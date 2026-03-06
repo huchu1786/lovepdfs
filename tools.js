@@ -31,6 +31,24 @@ const TOOLS = [
   {id:'sign',      name:'Sign PDF',           desc:'Draw or type your signature',                      icon:'✍️', clr:'#7C3AED', cat:'security', badge:'new'},
   {id:'redact',    name:'Redact PDF',         desc:'Permanently remove sensitive info',                icon:'⬛', clr:'#1F2937', cat:'security'},
   {id:'compare',   name:'Compare PDF',        desc:'Side-by-side diff of two PDFs',                    icon:'🔀', clr:'#0284C7', cat:'security', badge:'new'},
+  // ── SEJDA-INSPIRED NEW TOOLS ──
+  {id:'grayscale',   name:'Grayscale PDF',      desc:'Convert colour PDF to black-and-white',            icon:'⚫', clr:'#4B5563', cat:'optimize'},
+  {id:'flatten',     name:'Flatten PDF',         desc:'Make form fields non-editable permanently',        icon:'📄', clr:'#7C3AED', cat:'optimize'},
+  {id:'editMeta',    name:'Edit PDF Metadata',   desc:'Change title, author, keywords & more',            icon:'🏷️', clr:'#0284C7', cat:'edit'},
+  {id:'extractImg',  name:'Extract Images',      desc:'Extract all images from a PDF file',               icon:'🖼️', clr:'#DB2777', cat:'edit'},
+  {id:'resizepdf',   name:'Resize PDF',          desc:'Change page size and add margins to PDF',          icon:'↕️', clr:'#D97706', cat:'edit'},
+  {id:'altmix',      name:'Alternate & Mix',     desc:'Interleave pages from two PDFs',                   icon:'🔀', clr:'#8B5CF6', cat:'organize'},
+  {id:'headfoot',    name:'Header & Footer',     desc:'Add header and footer text to PDF',                icon:'📋', clr:'#0891B2', cat:'edit'},
+  {id:'removeann',   name:'Remove Annotations',  desc:'Strip all highlights, comments and markups',       icon:'🧹', clr:'#6366F1', cat:'edit'},
+  {id:'deskew',      name:'Deskew PDF',          desc:'Auto-straighten crooked scanned pages',            icon:'📐', clr:'#22C55E', cat:'optimize', badge:'new'},
+  {id:'pdf2txt',     name:'PDF to Text',         desc:'Extract all text from PDF to a .txt file',         icon:'📃', clr:'#F59E0B', cat:'convert'},
+
+  // ── IMAGE TOOLS ──
+  {id:'resize_img',name:'Resize Image',       desc:'Change image dimensions',                          icon:'↔️', clr:'#14B8A6', cat:'image'},
+  {id:'crop_img',  name:'Crop Image',         desc:'Remove unwanted image edges',                      icon:'✂️', clr:'#F59E0B', cat:'image'},
+  {id:'compress_img',name:'Compress Image',   desc:'Reduce image file size',                           icon:'🗜️', clr:'#8B5CF6', cat:'image'},
+  {id:'jpg2png_img',name:'JPG to PNG',        desc:'Convert JPEG to PNG',                              icon:'🔄', clr:'#EC4899', cat:'image'},
+  {id:'png2jpg_img',name:'PNG to JPG',        desc:'Convert PNG to JPEG',                              icon:'🔄', clr:'#DB2777', cat:'image'},
 ];
 
 const CATS = [
@@ -40,14 +58,18 @@ const CATS = [
   {id:'convert',label:'🔄 Convert'},
   {id:'edit',label:'✏️ Edit'},
   {id:'security',label:'🔐 Security'},
+  {id:'image',label:'🖼️ Image Tools', badge:'new'},
+  {id:'advanced',label:'🧰 Advanced',badge:'new'},
 ];
 
 const CAT_GROUPS = {
-  organize:{label:'📂 Organize PDF',tools:['merge','split','removepg','extract','organize']},
-  optimize:{label:'⚡ Optimize PDF',tools:['compress','repair','ocr']},
-  convert:{label:'🔄 Convert',tools:['jpg2pdf','word2pdf','ppt2pdf','xls2pdf','html2pdf','pdf2jpg','pdf2word','pdf2xls','pdf2pdfa']},
-  edit:{label:'✏️ Edit PDF',tools:['rotate','watermark','pagenums','crop','editpdf']},
+  organize:{label:'📂 Organize PDF',tools:['merge','split','removepg','extract','organize','altmix']},
+  optimize:{label:'⚡ Optimize PDF',tools:['compress','repair','ocr','grayscale','flatten','deskew']},
+  convert:{label:'🔄 Convert',tools:['jpg2pdf','word2pdf','ppt2pdf','xls2pdf','html2pdf','pdf2jpg','pdf2word','pdf2xls','pdf2pdfa','pdf2txt']},
+  edit:{label:'✏️ Edit PDF',tools:['rotate','watermark','pagenums','crop','editpdf','editMeta','extractImg','resizepdf','headfoot','removeann']},
   security:{label:'🔐 PDF Security',tools:['unlock','protect','sign','redact','compare']},
+  image:{label:'🖼️ Image Tools',tools:['resize_img','crop_img','compress_img','jpg2png_img','png2jpg_img']},
+  advanced:{label:'🧰 Advanced PDF',tools:['grayscale','flatten','editMeta','extractImg','resizepdf','altmix','headfoot','removeann','deskew','pdf2txt']},
 };
 
 // ── STATE ───────────────────────────────────────────────────────
@@ -868,4 +890,518 @@ async function doCompare(s){
   const bytes=await pdfOut.save();
   s.result={type:'pdf',bytes,filename:'comparison.pdf'};
   showRes('compare','Comparison ready!',`${pgs} page pairs compared side-by-side`); hideP('compare');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SEJDA-INSPIRED NEW TOOL IMPLEMENTATIONS
+// ══════════════════════════════════════════════════════════════
+
+// ── GRAYSCALE PDF ─────────────────────────────────────────────
+function uiGrayscale(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_grayscale" onclick="document.getElementById('fi_grayscale').click()">
+      <div class="dzone-icon">⚫</div><h3>Convert PDF to Grayscale</h3>
+      <p>Remove all colour — ideal for black-and-white printing</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_grayscale" accept=".pdf" hidden onchange="onFiles('grayscale',this.files)">
+    <div class="flist" id="fl_grayscale"></div>
+    <div class="prog" id="pw_grayscale"><div class="prog-hd"><span class="prog-l">Converting…</span><span class="prog-p" id="pp_grayscale">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_grayscale"></div></div></div>
+    <div class="result-box" id="rb_grayscale"><div class="result-ic">✅</div><div><div class="result-t" id="rt_grayscale"></div><div class="result-m" id="rm_grayscale"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_grayscale" onclick="run('grayscale')" disabled>⚫ Convert to Grayscale</button>
+      <a class="btn-dl" id="bd_grayscale">⬇️ Download</a>
+    </div>`;
+  setupDZ('gray','f_grayscale',['application/pdf']);
+}
+async function doGrayscale(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  setP('grayscale',10,'Loading PDF…');
+  const ab=await file.arrayBuffer();
+  const pjsDoc=await pjsLoad(ab);
+  const total=pjsDoc.numPages;
+  const newPdf=await PDFDocument.create();
+  for(let i=1;i<=total;i++){
+    setP('grayscale',10+(i/total)*80,`Converting page ${i}/${total}…`);
+    const pg=await pjsDoc.getPage(i);
+    const vp=pg.getViewport({scale:2});
+    const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height;
+    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    const ctx=cv.getContext('2d');
+    const id=ctx.getImageData(0,0,cv.width,cv.height);
+    const d=id.data;
+    for(let j=0;j<d.length;j+=4){const g=0.299*d[j]+0.587*d[j+1]+0.114*d[j+2];d[j]=d[j+1]=d[j+2]=g;}
+    ctx.putImageData(id,0,0);
+    const jb=await new Promise(r=>cv.toBlob(b=>b.arrayBuffer().then(r),'image/jpeg',0.9));
+    const img=await newPdf.embedJpg(jb);
+    const {width,height}=img.scale(1);
+    const np=newPdf.addPage([width/2,height/2]);
+    np.drawImage(img,{x:0,y:0,width:width/2,height:height/2});
+  }
+  const bytes=await newPdf.save();
+  s.result={type:'pdf',bytes,filename:'grayscale_'+file.name};
+  showRes('grayscale','Grayscale Done!',`${total} pages converted`); hideP('grayscale');
+}
+
+// ── FLATTEN PDF ───────────────────────────────────────────────
+function uiFlatten(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_flatten" onclick="document.getElementById('fi_flatten').click()">
+      <div class="dzone-icon">📄</div><h3>Flatten PDF</h3>
+      <p>Make all form fields and annotations permanently non-editable</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_flatten" accept=".pdf" hidden onchange="onFiles('flatten',this.files)">
+    <div class="flist" id="fl_flatten"></div>
+    <div class="prog" id="pw_flatten"><div class="prog-hd"><span class="prog-l">Flattening…</span><span class="prog-p" id="pp_flatten">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_flatten"></div></div></div>
+    <div class="result-box" id="rb_flatten"><div class="result-ic">✅</div><div><div class="result-t" id="rt_flatten"></div><div class="result-m" id="rm_flatten"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_flatten" onclick="run('flatten')" disabled>📄 Flatten PDF</button>
+      <a class="btn-dl" id="bd_flatten">⬇️ Download</a>
+    </div>`;
+  setupDZ('flat','f_flatten',['application/pdf']);
+}
+async function doFlatten(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  setP('flatten',30,'Loading PDF…');
+  const ab=await file.arrayBuffer();
+  const pdfDoc=await PDFDocument.load(ab,{ignoreEncryption:true});
+  setP('flatten',60,'Flattening…');
+  try{pdfDoc.getForm().flatten();}catch(e){}
+  setP('flatten',90,'Saving…');
+  const bytes=await pdfDoc.save();
+  s.result={type:'pdf',bytes,filename:'flat_'+file.name};
+  showRes('flatten','PDF Flattened!','All form fields are now non-editable'); hideP('flatten');
+}
+
+// ── EDIT METADATA ─────────────────────────────────────────────
+function uiEditMeta(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_editMeta" onclick="document.getElementById('fi_editMeta').click()">
+      <div class="dzone-icon">🏷️</div><h3>Edit PDF Metadata</h3>
+      <p>Change title, author, subject and keywords</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_editMeta" accept=".pdf" hidden>
+    <div class="flist" id="fl_editMeta"></div>
+    <div class="opt-section" id="metaOpts" style="display:none">
+      <div class="opt-section-title">Document Metadata</div>
+      <div class="opt-row">
+        <div class="opt-g"><div class="opt-l">Title</div><input class="opt-i" id="meta_title" placeholder="Document title"></div>
+        <div class="opt-g"><div class="opt-l">Author</div><input class="opt-i" id="meta_author" placeholder="Author name"></div>
+      </div>
+      <div class="opt-row" style="margin-top:0.75rem">
+        <div class="opt-g"><div class="opt-l">Subject</div><input class="opt-i" id="meta_subject" placeholder="Document subject"></div>
+        <div class="opt-g"><div class="opt-l">Keywords</div><input class="opt-i" id="meta_keywords" placeholder="keyword1, keyword2"></div>
+      </div>
+    </div>
+    <div class="prog" id="pw_editMeta"><div class="prog-hd"><span class="prog-l">Saving…</span><span class="prog-p" id="pp_editMeta">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_editMeta"></div></div></div>
+    <div class="result-box" id="rb_editMeta"><div class="result-ic">✅</div><div><div class="result-t" id="rt_editMeta"></div><div class="result-m" id="rm_editMeta"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_editMeta" onclick="run('editMeta')" disabled>💾 Save Metadata</button>
+      <a class="btn-dl" id="bd_editMeta">⬇️ Download</a>
+    </div>`;
+  setupDZ('editMeta');
+}
+async function doEditMeta(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  setP('editMeta',40,'Loading…');
+  const ab=await file.arrayBuffer();
+  const doc=await PDFDocument.load(ab,{ignoreEncryption:true});
+  setP('editMeta',70,'Updating metadata…');
+  const v=id=>document.getElementById(id).value;
+  if(v('meta_title')) doc.setTitle(v('meta_title'));
+  if(v('meta_author')) doc.setAuthor(v('meta_author'));
+  if(v('meta_subject')) doc.setSubject(v('meta_subject'));
+  if(v('meta_keywords')) doc.setKeywords([v('meta_keywords')]);
+  doc.setModificationDate(new Date());
+  const bytes=await doc.save();
+  s.result={type:'pdf',bytes,filename:'meta_'+file.name};
+  showRes('editMeta','Metadata Updated!','Saved successfully'); hideP('editMeta');
+}
+
+// ── EXTRACT IMAGES ────────────────────────────────────────────
+function uiExtractImg(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_extractImg" onclick="document.getElementById('fi_extractImg').click()">
+      <div class="dzone-icon">🖼️</div><h3>Extract Images from PDF</h3>
+      <p>Renders each page as an image and downloads as ZIP</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_extractImg" accept=".pdf" hidden onchange="onFiles('extractImg',this.files)">
+    <div class="flist" id="fl_extractImg"></div>
+    <div class="opt-section">
+      <div class="opt-row">
+        <div class="opt-g"><div class="opt-l">Format</div><select class="opt-s" id="eximg_fmt"><option value="jpeg">JPEG</option><option value="png">PNG</option></select></div>
+        <div class="opt-g"><div class="opt-l">Scale</div><select class="opt-s" id="eximg_scale"><option value="1">1x</option><option value="2" selected>2x</option><option value="3">3x</option></select></div>
+      </div>
+    </div>
+    <div class="prog" id="pw_extractImg"><div class="prog-hd"><span class="prog-l">Extracting…</span><span class="prog-p" id="pp_extractImg">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_extractImg"></div></div></div>
+    <div class="result-box" id="rb_extractImg"><div class="result-ic">✅</div><div><div class="result-t" id="rt_extractImg"></div><div class="result-m" id="rm_extractImg"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_extractImg" onclick="run('extractImg')" disabled>🖼️ Extract Images</button>
+      <a class="btn-dl" id="bd_extractImg">⬇️ Download ZIP</a>
+    </div>`;
+  setupDZ('eximg','f_extractImg',['application/pdf']);
+}
+async function doExtractImg(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  const fmt=document.getElementById('eximg_fmt').value;
+  const scale=parseFloat(document.getElementById('eximg_scale').value)||2;
+  setP('extractImg',10,'Loading…');
+  const ab=await file.arrayBuffer();
+  const pjsDoc=await pjsLoad(ab);
+  const total=pjsDoc.numPages;
+  const zip=new JSZip();
+  for(let i=1;i<=total;i++){
+    setP('extractImg',10+(i/total)*80,`Rendering ${i}/${total}…`);
+    const pg=await pjsDoc.getPage(i);
+    const vp=pg.getViewport({scale});
+    const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height;
+    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    const blob=await new Promise(r=>cv.toBlob(r,'image/'+fmt,0.92));
+    zip.file(`page_${String(i).padStart(3,'0')}.${fmt==='jpeg'?'jpg':'png'}`,await blob.arrayBuffer());
+  }
+  setP('extractImg',95,'Zipping…');
+  const zb=await zip.generateAsync({type:'arraybuffer'});
+  s.result={type:'zip',bytes:zb,filename:'images_'+file.name.replace('.pdf','.zip')};
+  showRes('extractImg',`${total} images extracted!`,fmtSize(zb.byteLength)); hideP('extractImg');
+}
+
+// ── RESIZE PDF ────────────────────────────────────────────────
+function uiResizepdf(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_resizepdf" onclick="document.getElementById('fi_resizepdf').click()">
+      <div class="dzone-icon">↕️</div><h3>Resize PDF Page Size</h3>
+      <p>Change all pages to a standard paper size</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_resizepdf" accept=".pdf" hidden onchange="onFiles('resizepdf',this.files)">
+    <div class="flist" id="fl_resizepdf"></div>
+    <div class="opt-section">
+      <div class="opt-row">
+        <div class="opt-g"><div class="opt-l">Page Size</div>
+          <select class="opt-s" id="rpdf_size"><option value="A4" selected>A4</option><option value="A3">A3</option><option value="A5">A5</option><option value="Letter">Letter</option><option value="Legal">Legal</option><option value="Tabloid">Tabloid</option></select>
+        </div>
+        <div class="opt-g"><div class="opt-l">Orientation</div>
+          <select class="opt-s" id="rpdf_orient"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="prog" id="pw_resizepdf"><div class="prog-hd"><span class="prog-l">Resizing…</span><span class="prog-p" id="pp_resizepdf">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_resizepdf"></div></div></div>
+    <div class="result-box" id="rb_resizepdf"><div class="result-ic">✅</div><div><div class="result-t" id="rt_resizepdf"></div><div class="result-m" id="rm_resizepdf"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_resizepdf" onclick="run('resizepdf')" disabled>↕️ Resize PDF</button>
+      <a class="btn-dl" id="bd_resizepdf">⬇️ Download</a>
+    </div>`;
+  setupDZ('rpdf','f_resizepdf',['application/pdf']);
+}
+async function doResizepdf(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  const sizes={A4:[595.28,841.89],A3:[841.89,1190.55],A5:[419.53,595.28],Letter:[612,792],Legal:[612,1008],Tabloid:[792,1224]};
+  let [W,H]=sizes[document.getElementById('rpdf_size').value]||sizes.A4;
+  if(document.getElementById('rpdf_orient').value==='landscape'){[W,H]=[H,W];}
+  setP('resizepdf',15,'Loading…');
+  const ab=await file.arrayBuffer();
+  const pjsDoc=await pjsLoad(ab);
+  const total=pjsDoc.numPages;
+  const newPdf=await PDFDocument.create();
+  for(let i=1;i<=total;i++){
+    setP('resizepdf',15+(i/total)*75,`Resizing ${i}/${total}…`);
+    const pg=await pjsDoc.getPage(i); const vp=pg.getViewport({scale:2});
+    const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height;
+    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    const jb=await new Promise(r=>cv.toBlob(b=>b.arrayBuffer().then(r),'image/jpeg',0.92));
+    const img=await newPdf.embedJpg(jb);
+    const sc=Math.min(W/img.width,H/img.height);
+    const dw=img.width*sc, dh=img.height*sc;
+    const np=newPdf.addPage([W,H]);
+    np.drawImage(img,{x:(W-dw)/2,y:(H-dh)/2,width:dw,height:dh});
+  }
+  const bytes=await newPdf.save();
+  s.result={type:'pdf',bytes,filename:`${document.getElementById('rpdf_size').value}_${file.name}`};
+  showRes('resizepdf','PDF Resized!',`${total} pages done`); hideP('resizepdf');
+}
+
+// ── ALTERNATE & MIX ───────────────────────────────────────────
+let altFiles_={A:null,B:null};
+function uiAltmix(el){
+  el.innerHTML=`
+    <p style="margin-bottom:1rem;color:var(--muted);font-size:1.05rem">Interleave pages from two PDFs — perfect for combining front/back scans of a book.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      <div>
+        <div style="font-weight:700;margin-bottom:0.5rem;color:var(--muted);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.08em">PDF A — Front / Odd</div>
+        <div class="dzone" style="padding:2rem" id="dz_altA" onclick="document.getElementById('f_altA').click()">
+          <div class="dzone-icon" style="font-size:2.5rem">📄</div><p style="font-size:1rem">Choose PDF A</p>
+        </div>
+        <input type="file" id="f_altA" accept=".pdf" hidden onchange="onAltFile_('A',this.files)">
+        <div id="altA_info" style="font-size:0.9rem;color:var(--muted);padding:0.4rem 0"></div>
+      </div>
+      <div>
+        <div style="font-weight:700;margin-bottom:0.5rem;color:var(--muted);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.08em">PDF B — Back / Even</div>
+        <div class="dzone" style="padding:2rem" id="dz_altB" onclick="document.getElementById('f_altB').click()">
+          <div class="dzone-icon" style="font-size:2.5rem">📄</div><p style="font-size:1rem">Choose PDF B</p>
+        </div>
+        <input type="file" id="f_altB" accept=".pdf" hidden onchange="onAltFile_('B',this.files)">
+        <div id="altB_info" style="font-size:0.9rem;color:var(--muted);padding:0.4rem 0"></div>
+      </div>
+    </div>
+    <div class="opt-section">
+      <div class="opt-row">
+        <div class="opt-g"><div class="opt-l">Order</div><select class="opt-s" id="alt_order"><option value="AB">A,B,A,B…</option><option value="BA">B,A,B,A…</option></select></div>
+        <div class="opt-g"><div class="opt-l">Reverse PDF B</div><select class="opt-s" id="alt_rev"><option value="no">No</option><option value="yes">Yes (back-scan)</option></select></div>
+      </div>
+    </div>
+    <div class="prog" id="prog_altmix"><div class="prog-hd"><span class="prog-l">Mixing…</span><span class="prog-p" id="pv_altmix">0%</span></div><div class="prog-track"><div class="prog-bar" id="pb_altmix"></div></div></div>
+    <div class="result-box" id="res_altmix"><div class="result-ic">✅</div><div><div class="result-t" id="rt_altmix"></div><div class="result-m" id="rm_altmix"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_altmix" onclick="run('altmix')" disabled>🔀 Alternate & Mix</button>
+      <a class="btn-dl" id="dl_altmix">⬇️ Download</a>
+    </div>`;
+  altFiles_={A:null,B:null};
+}
+function onAltFile_(side,files){
+  if(!files.length)return;
+  altFiles_[side]=files[0];
+  const el=document.getElementById('alt'+side+'_info');
+  if(el) el.textContent='✅ '+files[0].name;
+  if(altFiles_.A&&altFiles_.B) document.getElementById('bg_altmix').disabled=false;
+}
+async function doAltmix(s){
+  if(!altFiles_.A||!altFiles_.B) throw new Error('Upload both PDFs first');
+  const rev=document.getElementById('alt_rev').value==='yes';
+  const order=document.getElementById('alt_order').value;
+  setP('altmix',10,'Loading…');
+  const docA=await PDFDocument.load(await altFiles_.A.arrayBuffer());
+  const docB=await PDFDocument.load(await altFiles_.B.arrayBuffer());
+  const pgsA=docA.getPageCount(), pgsB=docB.getPageCount();
+  const out=await PDFDocument.create();
+  const maxPgs=Math.max(pgsA,pgsB);
+  for(let i=0;i<maxPgs;i++){
+    setP('altmix',10+(i/maxPgs)*82,`Page ${i+1}…`);
+    const idxB=rev?(pgsB-1-i):i;
+    const pickA=async()=>{if(i<pgsA){const[p]=await out.copyPages(docA,[i]);out.addPage(p);}};
+    const pickB=async()=>{if(idxB>=0&&idxB<pgsB){const[p]=await out.copyPages(docB,[idxB]);out.addPage(p);}};
+    if(order==='AB'){await pickA();await pickB();}else{await pickB();await pickA();}
+  }
+  const bytes=await out.save();
+  s.result={type:'pdf',bytes,filename:'alternated.pdf'};
+  showRes('altmix','PDFs Mixed!',`${out.getPageCount()} pages total`); hideP('altmix');
+}
+
+// ── HEADER & FOOTER ───────────────────────────────────────────
+function uiHeadfoot(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_headfoot" onclick="document.getElementById('fi_headfoot').click()">
+      <div class="dzone-icon">📋</div><h3>Add Header & Footer</h3>
+      <p>Stamp text at the top/bottom of every page. Use {page} and {total}.</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_headfoot" accept=".pdf" hidden onchange="onFiles('headfoot',this.files)">
+    <div class="flist" id="fl_headfoot"></div>
+    <div class="opt-section">
+      <div class="opt-section-title">Header</div>
+      <div class="opt-row">
+        <div class="opt-g" style="flex:2"><div class="opt-l">Header Text</div><input class="opt-i" id="hf_htxt" placeholder="e.g. Confidential or {page}/{total}"></div>
+        <div class="opt-g"><div class="opt-l">Align</div><select class="opt-s" id="hf_halign"><option>left</option><option selected>center</option><option>right</option></select></div>
+      </div>
+    </div>
+    <div class="opt-section">
+      <div class="opt-section-title">Footer</div>
+      <div class="opt-row">
+        <div class="opt-g" style="flex:2"><div class="opt-l">Footer Text</div><input class="opt-i" id="hf_ftxt" placeholder="e.g. Page {page} of {total}"></div>
+        <div class="opt-g"><div class="opt-l">Align</div><select class="opt-s" id="hf_falign"><option>left</option><option selected>center</option><option>right</option></select></div>
+      </div>
+    </div>
+    <div class="opt-section">
+      <div class="opt-row">
+        <div class="opt-g"><div class="opt-l">Font Size (pt)</div><input class="opt-i" id="hf_size" type="number" value="11" min="6" max="30"></div>
+        <div class="opt-g"><div class="opt-l">Margin (pt)</div><input class="opt-i" id="hf_margin" type="number" value="20" min="5" max="100"></div>
+      </div>
+    </div>
+    <div class="prog" id="pw_headfoot"><div class="prog-hd"><span class="prog-l">Stamping…</span><span class="prog-p" id="pp_headfoot">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_headfoot"></div></div></div>
+    <div class="result-box" id="rb_headfoot"><div class="result-ic">✅</div><div><div class="result-t" id="rt_headfoot"></div><div class="result-m" id="rm_headfoot"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_headfoot" onclick="run('headfoot')" disabled>📋 Apply</button>
+      <a class="btn-dl" id="dl_headfoot">⬇️ Download</a>
+    </div>`;
+  setupDZ('hf','f_headfoot',['application/pdf']);
+}
+async function doHeadfoot(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  const htxt=document.getElementById('hf_htxt').value.trim();
+  const ftxt=document.getElementById('hf_ftxt').value.trim();
+  if(!htxt&&!ftxt) throw new Error('Enter header or footer text');
+  const halign=document.getElementById('hf_halign').value;
+  const falign=document.getElementById('hf_falign').value;
+  const fs=parseInt(document.getElementById('hf_size').value)||11;
+  const mg=parseInt(document.getElementById('hf_margin').value)||20;
+  setP('headfoot',20,'Loading…');
+  const ab=await file.arrayBuffer();
+  const doc=await PDFDocument.load(ab);
+  const font=await doc.embedFont(StandardFonts.Helvetica);
+  const pages=doc.getPages(); const total=pages.length;
+  for(let i=0;i<pages.length;i++){
+    setP('headfoot',20+(i/total)*75,`Page ${i+1}…`);
+    const pg=pages[i]; const {width,height}=pg.getSize();
+    const res=txt=>txt.replace(/{page}/g,i+1).replace(/{total}/g,total);
+    const draw=(text,y,align)=>{
+      const tw=font.widthOfTextAtSize(text,fs);
+      let x=mg;
+      if(align==='center') x=(width-tw)/2;
+      else if(align==='right') x=width-tw-mg;
+      pg.drawText(text,{x,y,font,size:fs,color:rgb(0.2,0.2,0.2)});
+    };
+    if(htxt) draw(res(htxt),height-mg-fs,halign);
+    if(ftxt) draw(res(ftxt),mg,falign);
+  }
+  const bytes=await doc.save();
+  s.result={type:'pdf',bytes,filename:'hf_'+file.name};
+  showRes('headfoot','Done!',`Header/footer on ${total} pages`); hideP('headfoot');
+}
+
+// ── REMOVE ANNOTATIONS ────────────────────────────────────────
+function uiRemoveann(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_removeann" onclick="document.getElementById('fi_removeann').click()">
+      <div class="dzone-icon">🧹</div><h3>Remove PDF Annotations</h3>
+      <p>Strip highlights, comments, sticky notes and all markups</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_removeann" accept=".pdf" hidden onchange="onFiles('removeann',this.files)">
+    <div class="flist" id="fl_removeann"></div>
+    <div class="prog" id="pw_removeann"><div class="prog-hd"><span class="prog-l">Cleaning…</span><span class="prog-p" id="pp_removeann">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_removeann"></div></div></div>
+    <div class="result-box" id="rb_removeann"><div class="result-ic">✅</div><div><div class="result-t" id="rt_removeann"></div><div class="result-m" id="rm_removeann"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_removeann" onclick="run('removeann')" disabled>🧹 Remove Annotations</button>
+      <a class="btn-dl" id="dl_removeann">⬇️ Download</a>
+    </div>`;
+  setupDZ('rann','f_removeann',['application/pdf']);
+}
+async function doRemoveann(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  setP('removeann',30,'Loading…');
+  const ab=await file.arrayBuffer();
+  const doc=await PDFDocument.load(ab,{ignoreEncryption:true});
+  const pages=doc.getPages();
+  for(const pg of pages){
+    try{if(pg.node.has('Annots'))pg.node.delete('Annots');}catch(e){}
+  }
+  setP('removeann',90,'Saving…');
+  const bytes=await doc.save();
+  s.result={type:'pdf',bytes,filename:'clean_'+file.name};
+  showRes('removeann','Annotations Removed!',`Cleaned ${pages.length} pages`); hideP('removeann');
+}
+
+// ── DESKEW PDF ────────────────────────────────────────────────
+function uiDeskew(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_deskew" onclick="document.getElementById('fi_deskew').click()">
+      <div class="dzone-icon">📐</div><h3>Deskew / Straighten PDF</h3>
+      <p>Correct rotation angle of scanned PDF pages</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_deskew" accept=".pdf" hidden onchange="onFiles('deskew',this.files)">
+    <div class="flist" id="fl_deskew"></div>
+    <div class="opt-section">
+      <div class="opt-row">
+        <div class="opt-g"><div class="opt-l">Correction Angle (°)</div><input class="opt-i" id="dsk_angle" type="number" value="0" min="-30" max="30" step="0.5" placeholder="e.g. -1.5"></div>
+        <div class="opt-g"><div class="opt-l">Scale</div><select class="opt-s" id="dsk_scale"><option value="1">1x</option><option value="2" selected>2x</option></select></div>
+      </div>
+    </div>
+    <div class="prog" id="pw_deskew"><div class="prog-hd"><span class="prog-l">Straightening…</span><span class="prog-p" id="pp_deskew">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_deskew"></div></div></div>
+    <div class="result-box" id="rb_deskew"><div class="result-ic">✅</div><div><div class="result-t" id="rt_deskew"></div><div class="result-m" id="rm_deskew"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_deskew" onclick="run('deskew')" disabled>📐 Deskew PDF</button>
+      <a class="btn-dl" id="dl_deskew">⬇️ Download</a>
+    </div>`;
+  setupDZ('dsk','f_deskew',['application/pdf']);
+}
+async function doDeskew(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  const angle=parseFloat(document.getElementById('dsk_angle').value)||0;
+  const scale=parseFloat(document.getElementById('dsk_scale').value)||2;
+  setP('deskew',10,'Loading…');
+  const ab=await file.arrayBuffer();
+  const pjsDoc=await pjsLoad(ab);
+  const total=pjsDoc.numPages;
+  const newPdf=await PDFDocument.create();
+  const rad=angle*Math.PI/180;
+  const sin=Math.abs(Math.sin(rad)),cos=Math.abs(Math.cos(rad));
+  for(let i=1;i<=total;i++){
+    setP('deskew',10+(i/total)*80,`Straightening ${i}/${total}…`);
+    const pg=await pjsDoc.getPage(i);
+    const vp=pg.getViewport({scale});
+    const src=document.createElement('canvas'); src.width=vp.width; src.height=vp.height;
+    await pg.render({canvasContext:src.getContext('2d'),viewport:vp}).promise;
+    const W=Math.ceil(vp.height*sin+vp.width*cos);
+    const H=Math.ceil(vp.height*cos+vp.width*sin);
+    const dst=document.createElement('canvas'); dst.width=W; dst.height=H;
+    const ctx=dst.getContext('2d');
+    ctx.fillStyle='white'; ctx.fillRect(0,0,W,H);
+    ctx.translate(W/2,H/2); ctx.rotate(rad);
+    ctx.drawImage(src,-vp.width/2,-vp.height/2);
+    const jb=await new Promise(r=>dst.toBlob(b=>b.arrayBuffer().then(r),'image/jpeg',0.93));
+    const img=await newPdf.embedJpg(jb);
+    const {width,height}=img.scale(1);
+    const np=newPdf.addPage([width/2,height/2]);
+    np.drawImage(img,{x:0,y:0,width:width/2,height:height/2});
+  }
+  const bytes=await newPdf.save();
+  s.result={type:'pdf',bytes,filename:'deskewed_'+file.name};
+  showRes('deskew','PDF Straightened!',`${total} pages deskewed`); hideP('deskew');
+}
+
+// ── PDF TO TEXT ───────────────────────────────────────────────
+function uiPdf2txt(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_pdf2txt" onclick="document.getElementById('fi_pdf2txt').click()">
+      <div class="dzone-icon">📃</div><h3>Convert PDF to Text</h3>
+      <p>Extract all text from PDF into a plain .txt file</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_pdf2txt" accept=".pdf" hidden onchange="onFiles('pdf2txt',this.files)">
+    <div class="flist" id="fl_pdf2txt"></div>
+    <div class="opt-section">
+      <div class="opt-row">
+        <div class="opt-g"><div class="opt-l">Pages</div>
+          <select class="opt-s" id="p2t_pages"><option value="all" selected>All Pages</option><option value="first">First Page Only</option><option value="custom">Custom Range</option></select>
+        </div>
+        <div class="opt-g"><div class="opt-l">Range (if custom)</div><input class="opt-i" id="p2t_range" placeholder="e.g. 1-5, 8"></div>
+      </div>
+    </div>
+    <div class="prog" id="pw_pdf2txt"><div class="prog-hd"><span class="prog-l">Extracting…</span><span class="prog-p" id="pp_pdf2txt">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_pdf2txt"></div></div></div>
+    <div id="p2t_preview" style="display:none;background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:1.25rem;max-height:220px;overflow-y:auto;font-size:0.92rem;line-height:1.75;white-space:pre-wrap;word-break:break-word;margin:.75rem 0;font-family:monospace"></div>
+    <div class="result-box" id="rb_pdf2txt"><div class="result-ic">✅</div><div><div class="result-t" id="rt_pdf2txt"></div><div class="result-m" id="rm_pdf2txt"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_pdf2txt" onclick="run('pdf2txt')" disabled>📃 Extract Text</button>
+      <a class="btn-dl" id="dl_pdf2txt">⬇️ Download .txt</a>
+    </div>`;
+  setupDZ('p2t','f_pdf2txt',['application/pdf']);
+}
+async function doPdf2txt(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  const mode=document.getElementById('p2t_pages').value;
+  const rangeStr=document.getElementById('p2t_range').value;
+  setP('pdf2txt',10,'Loading…');
+  const ab=await file.arrayBuffer();
+  const pjsDoc=await pjsLoad(ab);
+  const total=pjsDoc.numPages;
+  let idxs;
+  if(mode==='first') idxs=[0];
+  else if(mode==='custom'&&rangeStr) idxs=parseRange(rangeStr,total);
+  else idxs=Array.from({length:total},(_,i)=>i);
+  let txt='';
+  for(let ii=0;ii<idxs.length;ii++){
+    const idx=idxs[ii];
+    setP('pdf2txt',10+(ii/idxs.length)*82,`Page ${idx+1}…`);
+    const pg=await pjsDoc.getPage(idx+1);
+    const tc=await pg.getTextContent();
+    txt+=`\n=== Page ${idx+1} ===\n`+tc.items.map(it=>it.str).join(' ')+'\n';
+  }
+  const preview=document.getElementById('p2t_preview');
+  preview.style.display=''; preview.textContent=txt.trim();
+  const bytes=new TextEncoder().encode(txt).buffer;
+  s.result={type:'txt',bytes,filename:file.name.replace('.pdf','.txt')};
+  showRes('pdf2txt','Text Extracted!',`${idxs.length} pages · ${txt.length.toLocaleString()} chars`); hideP('pdf2txt');
 }

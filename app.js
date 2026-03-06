@@ -52,7 +52,11 @@ function toolCard(t){
     'jpg2png_img': 'jpg-to-png', 'png2jpg_img': 'png-to-jpg',
     'editpdf': 'edit-pdf', 'extract': 'extract-pages-pdf', 'repair': 'repair-pdf', 'ocr': 'ocr-extract-text',
     'sign': 'sign-pdf', 'redact': 'redact-pdf', 'compare': 'compare-pdf', 'html2pdf': 'html-to-pdf',
-    'pdf2pdfa': 'pdf-to-pdfa', 'pagenums': 'add-page-numbers-pdf', 'pdf2ppt': 'pdf-to-ppt'
+    'pdf2pdfa': 'pdf-to-pdfa', 'pagenums': 'add-page-numbers-pdf', 'pdf2ppt': 'pdf-to-ppt',
+    'grayscale': 'grayscale-pdf', 'flatten': 'flatten-pdf', 'editMeta': 'edit-pdf-metadata',
+    'extractImg': 'extract-images-pdf', 'resizepdf': 'resize-pdf', 'altmix': 'alternate-mix-pdf',
+    'headfoot': 'header-footer-pdf', 'removeann': 'remove-annotations-pdf',
+    'deskew': 'deskew-pdf', 'pdf2txt': 'pdf-to-text'
   };
   
   const href = isHome ? (slugMap[t.id] ? `./${slugMap[t.id]}/index.html` : `javascript:openTool('${t.id}')`) : 
@@ -179,13 +183,28 @@ function buildUI(id){
     case 'compress_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+OPTS(id,S('coi_q','Quality',[['0.9','Best Quality (90%)'],['0.75','Good Balance (75%)'],['0.5','Smallest Size (50%)']],'0.75'))+PROG(id)+RES(id)+ACTS(id);
     case 'jpg2png_img': return DZ(id,'.jpg,.jpeg',false)+PROG(id)+RES(id)+ACTS(id);
     case 'png2jpg_img': return DZ(id,'.png',false)+PROG(id)+RES(id)+ACTS(id);
+    // Sejda-inspired tools — use dedicated setup functions with delayed DOM injection
+    case 'grayscale': setTimeout(()=>uiGrayscale(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'flatten':   setTimeout(()=>uiFlatten(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'editMeta':  setTimeout(()=>uiEditMeta(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'extractImg':setTimeout(()=>uiExtractImg(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'resizepdf': setTimeout(()=>uiResizepdf(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'altmix':    setTimeout(()=>uiAltmix(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'headfoot':  setTimeout(()=>uiHeadfoot(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'removeann': setTimeout(()=>uiRemoveann(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'deskew':    setTimeout(()=>uiDeskew(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
+    case 'pdf2txt':   setTimeout(()=>uiPdf2txt(document.getElementById('toolWorkspace')||document.getElementById('mBody')), 0); return '<div style="text-align:center;padding:3rem">Loading tool...</div>';
     default: return '<p style="color:var(--muted)">Coming soon!</p>';
   }
 }
 
 function label(id){
   const m={merge:'🔗 Merge PDFs',split:'✂️ Split PDF',removepg:'🗑️ Delete Pages',extract:'📤 Extract Pages',organize:'📋 Apply Order',compress:'🗜️ Compress PDF',repair:'🔧 Repair PDF',ocr:'🔡 Extract Text',jpg2pdf:'📷 Convert to PDF',word2pdf:'📝 Convert to PDF',ppt2pdf:'📊 Convert to PDF',xls2pdf:'📈 Convert to PDF',html2pdf:'🌐 Convert to PDF',pdf2jpg:'🖼️ Convert to Images',pdf2word:'📄 Convert to Word',pdf2xls:'📊 Export to CSV',pdf2pdfa:'🗂️ Convert to PDF/A',rotate:'🔄 Rotate Pages',watermark:'💧 Apply Watermark',pagenums:'🔢 Add Page Numbers',crop:'🔲 Crop Pages',editpdf:'✏️ Save Annotated PDF',unlock:'🔓 Unlock PDF',protect:'🔐 Protect PDF',sign:'✍️ Add Signature',redact:'⬛ Apply Redactions',compare:'🔀 Compare PDFs',
-  resize_img:'↔️ Resize Image', crop_img:'✂️ Crop Image', compress_img:'🗜️ Compress Image', jpg2png_img:'🔄 Convert to PNG', png2jpg_img:'🔄 Convert to JPG'};
+  resize_img:'↔️ Resize Image', crop_img:'✂️ Crop Image', compress_img:'🗜️ Compress Image', jpg2png_img:'🔄 Convert to PNG', png2jpg_img:'🔄 Convert to JPG',
+  grayscale:'⚫ Convert to Grayscale', flatten:'📄 Flatten PDF', editMeta:'💾 Save Metadata',
+  extractImg:'🖼️ Extract Images', resizepdf:'↕️ Resize PDF', altmix:'🔀 Alternate & Mix',
+  headfoot:'📋 Apply Header/Footer', removeann:'🧹 Remove Annotations',
+  deskew:'📐 Deskew PDF', pdf2txt:'📃 Extract Text'};
   return m[id]||'⚙️ Process';
 }
 
@@ -202,6 +221,15 @@ function onFiles(id,flist){
   if(id==='editpdf') initEdit(s.files[0]);
   if(id==='sign') initSign();
   if(id==='redact') initRedact(s.files[0]);
+    if(id==='editMeta'){
+    document.getElementById('metaOpts').style.display='';
+    s.files[0].arrayBuffer().then(ab=>PDFDocument.load(ab).then(doc=>{
+      document.getElementById('meta_title').value=doc.getTitle()||'';
+      document.getElementById('meta_author').value=doc.getAuthor()||'';
+      document.getElementById('meta_subject').value=doc.getSubject()||'';
+      document.getElementById('meta_keywords').value=doc.getKeywords()||'';
+    }).catch(()=>{}));
+  }
   if(id==='ocr'){document.getElementById('ocr_panel').style.display='block';showOpts(id);}
 }
 function renderFL(id){
@@ -293,6 +321,16 @@ async function run(id){
       case 'compress_img': await doCompressImg(s);break;
       case 'jpg2png_img': await doJpg2Png(s);break;
       case 'png2jpg_img': await doPng2Jpg(s);break;
+      case 'grayscale':  await doGrayscale(s);break;
+      case 'flatten':    await doFlatten(s);break;
+      case 'editMeta':   await doEditMeta(s);break;
+      case 'extractImg': await doExtractImg(s);break;
+      case 'resizepdf':  await doResizepdf(s);break;
+      case 'altmix':     await doAltmix(s);break;
+      case 'headfoot':   await doHeadfoot(s);break;
+      case 'removeann':  await doRemoveann(s);break;
+      case 'deskew':     await doDeskew(s);break;
+      case 'pdf2txt':    await doPdf2txt(s);break;
     }
     showToast('✅','Done!','Your file is ready to download.','ok');
   }catch(e){

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Sign PDF Online Free | Add Digital Signature</title>
+  <meta name="description" content="Sign PDF documents online for free. Draw or type your signature directly onto any PDF."/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23E8321A'/><text y='72' x='50' text-anchor='middle' font-size='58' font-family='Arial' font-weight='900' fill='white'>P</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+    /* ── TOOL PAGE PREMIUM STYLES ── */
+    
+    .tool-hero {
+      background: linear-gradient(170deg, var(--bg2) 0%, var(--bg) 100%);
+      padding: 7rem 2rem 6rem;
+      text-align: center;
+      border-bottom: 2px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-hero::before {
+      content: '';
+      position: absolute; top: -80px; right: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(232,50,26,0.1) 0%, transparent 65%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .tool-hero::after {
+      content: '';
+      position: absolute; bottom: -60px; left: -80px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 65%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .tool-hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(232,50,26,0.08); border: 1.5px solid rgba(232,50,26,0.2);
+      color: var(--red); padding: 0.45rem 1.1rem;
+      border-radius: 100px; font-size: 0.85rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 1.5rem; text-decoration: none;
+    }
+    .tool-hero-eyebrow:hover { background: rgba(232,50,26,0.14); }
+    .tool-hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(3.5rem, 8vw, 68px);
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      position: relative; z-index: 1;
+    }
+    .tool-hero p {
+      color: var(--muted);
+      max-width: 650px;
+      margin: 0 auto 1.5rem;
+      font-size: 1.45rem;
+      line-height: 1.9;
+      position: relative; z-index: 1;
+    }
+    .tool-trust-row {
+      display: flex; gap: 1.5rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 1.25rem;
+      position: relative; z-index: 1;
+    }
+    .tool-trust-item {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 1.1rem; color: var(--muted); font-weight: 500;
+    }
+    .tool-trust-item .check { color: var(--green); font-weight: 900; }
+
+    /* ── TOOL WORKSPACE ── */
+    .tool-workspace {
+      max-width: 840px;
+      margin: -3.5rem auto 5rem;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 26px;
+      padding: 3rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 4px 20px rgba(0,0,0,0.06);
+      position: relative;
+      z-index: 10;
+    }
+    body.dark .tool-workspace {
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+
+    /* ── SEO CONTENT ── */
+    .seo-content {
+      max-width: 840px;
+      margin: 0 auto 6rem;
+      padding: 0 2rem;
+    }
+    .seo-content h2 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.4rem, 5vw, 46px);
+      font-weight: 900;
+      margin: 4rem 0 1.75rem;
+      color: var(--text);
+      letter-spacing: -0.025em;
+    }
+    .seo-content h2:first-child { margin-top: 2rem; }
+    .seo-content h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin: 2.5rem 0 1.1rem;
+      color: var(--text);
+    }
+    .seo-content p {
+      font-size: 1.25rem;
+      line-height: 1.9;
+      color: var(--text2);
+      margin-bottom: 1.1rem;
+    }
+    
+    /* ── STEPS LIST ── */
+    .steps-list {
+      list-style-type: none; padding: 0;
+      counter-reset: step-counter;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .steps-list li {
+      position: relative; padding: 1.35rem 1.5rem 1.35rem 4.75rem;
+      background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: 14px; font-size: 1.2rem; color: var(--text2);
+      line-height: 1.8; transition: all 0.25s;
+    }
+    .steps-list li:hover { border-color: rgba(232,50,26,0.3); background: var(--bg); }
+    .steps-list li::before {
+      counter-increment: step-counter;
+      content: counter(step-counter);
+      position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%);
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, rgba(232,50,26,0.12), rgba(232,50,26,0.06));
+      color: var(--red); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.1rem;
+      border: 1.5px solid rgba(232,50,26,0.2);
+    }
+
+    /* ── BENEFITS GRID ── */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem; margin: 1.5rem 0;
+    }
+    .benefit-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      padding: 1.75rem; border-radius: 18px;
+      transition: all 0.25s; position: relative; overflow: hidden;
+    }
+    .benefit-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--red), #FF9A3A);
+      transform: scaleX(0); transform-origin: left; transition: transform 0.35s;
+    }
+    .benefit-card:hover { border-color: rgba(232,50,26,0.25); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+    .benefit-card:hover::before { transform: scaleX(1); }
+    .benefit-card h4 {
+      margin: 0 0 0.65rem; font-size: 1.35rem;
+      color: var(--text); font-weight: 700;
+      font-family: 'Fraunces', serif;
+    }
+    .benefit-card p { margin: 0; font-size: 1.15rem; color: var(--muted); line-height: 1.75; }
+
+    /* ── FAQ ── */
+    .faq-list {
+      background: var(--card); border: 2px solid var(--border);
+      border-radius: 18px; overflow: hidden;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border); padding: 1.75rem 2rem;
+      transition: background 0.2s;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-item:hover { background: var(--bg2); }
+    .faq-q {
+      font-weight: 700; font-size: 1.2rem;
+      color: var(--text); margin-bottom: 0.65rem;
+      display: flex; align-items: flex-start; gap: 0.75rem;
+    }
+    .faq-q::before {
+      content: 'Q';
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color: white; border-radius: 8px; padding: 0.1rem 0.55rem;
+      font-size: 0.88rem; font-weight: 800; flex-shrink: 0; margin-top: 2px;
+    }
+    .faq-a { color: var(--muted); margin: 0; font-size: 1.15rem; line-height: 1.85; padding-left: 2.2rem; }
+
+    /* ── RELATED TOOLS ── */
+    .related-links {
+      display: flex; gap: 0.875rem;
+      flex-wrap: wrap; margin-top: 1rem;
+    }
+    .related-chip {
+      padding: 0.85rem 1.65rem;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      text-decoration: none; color: var(--text); font-weight: 600;
+      font-size: 1.15rem; transition: all 0.25s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .related-chip:hover {
+      border-color: var(--red); color: var(--red);
+      transform: translateY(-3px); box-shadow: 0 8px 24px rgba(232,50,26,0.15);
+    }
+
+    /* ── CONTACT STRIP ── */
+    .contact-strip {
+      background: linear-gradient(135deg, rgba(232,50,26,0.06), rgba(124,58,237,0.04));
+      border: 2px solid rgba(232,50,26,0.15);
+      border-radius: 20px; padding: 2.25rem 2.5rem;
+      margin: 4rem 0; text-align: center;
+    }
+    .contact-strip h3 {
+      font-family: 'Fraunces', serif; font-size: 1.6rem;
+      font-weight: 900; color: var(--text); margin-bottom: 0.65rem;
+    }
+    .contact-strip p { color: var(--muted); margin-bottom: 1.25rem; font-size: 1.2rem; }
+    .contact-strip a {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color: white; padding: 0.875rem 2rem;
+      border-radius: 50px; font-weight: 700; font-size: 1rem;
+      text-decoration: none; transition: all 0.25s;
+      box-shadow: 0 6px 20px rgba(232,50,26,0.3);
+    }
+    .contact-strip a:hover { box-shadow: 0 10px 32px rgba(232,50,26,0.42); transform: translateY(-2px); }
+  </style>
+  <!-- ═══ GOOGLE ADSENSE ═══ Replace ca-pub-1303178479491171 with your Publisher ID ═══ -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1303178479491171"
+       crossorigin="anonymous"></script>
+  <!-- ════════════════════════════════════════════════════════════════ -->
+</head>
+<body data-tool-id="sign">
+
+<!-- NAV -->
+<nav class="site-nav" id="siteNav">
+  <a href="../index.html" class="nav-logo"><div class="nav-logo-ic">P</div>i<span>Love</span>PDFs</a>
+  <div class="nav-mid">
+    <a href="../index.html#tools" class="nav-link">All Tools</a>
+    <a href="../index.html#tools" class="nav-link">PDF Tools</a>
+    <a href="../index.html#tools" class="nav-link">Image Tools</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+    <a href="mailto:huchusim@gmail.com" class="nav-btn-o">✉️ Contact</a>
+    <a href="../index.html" class="nav-btn-f">← All Tools</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="tool-hero page-wrap">
+  <a href="../index.html#tools" class="tool-hero-eyebrow">← Back to All Tools</a>
+  <h1>Sign PDF</h1>
+  <p>Add your handwritten or typed signature to any PDF document.</p>
+  <div class="tool-trust-row">
+    <div class="tool-trust-item"><span class="check">✓</span> 100% Free</div>
+    <div class="tool-trust-item"><span class="check">✓</span> No Signup Required</div>
+    <div class="tool-trust-item"><span class="check">✓</span> Files Stay Private</div>
+    <div class="tool-trust-item"><span class="check">✓</span> Browser-Powered</div>
+  </div>
+</section>
+
+<!-- Google AdSense Banner – Tool Page – Above Tool -->
+<div class="adsense-wrap" style="text-align:center;padding:1.5rem 1rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:2rem 0;">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-1303178479491171"
+       data-ad-slot="3333333333"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+<!-- THE ACTUAL TOOL UI WILL BE MOUNTED HERE BY APP.JS -->
+<div class="tool-workspace" id="toolWorkspace">
+  <div style="text-align:center; padding: 2.5rem; color: var(--muted); font-size:1.1rem">
+    <div style="font-size:2.5rem;margin-bottom:1rem">⚡</div>
+    Loading tool interface…
+  </div>
+</div>
+
+<!-- Google AdSense Banner – Tool Page – Below Tool -->
+<div class="adsense-wrap" style="text-align:center;padding:1.5rem 1rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:2rem 0;">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-1303178479491171"
+       data-ad-slot="4444444444"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+<!-- SEO CONTENT -->
+<section class="seo-content">
+  <h2>How to Use This Tool</h2>
+  <ol class="steps-list">
+    <li>Upload the PDF document you need to sign.</li>
+    <li>Choose to draw your signature with your mouse/finger or type it.</li>
+    <li>Select the placement position (bottom-right, bottom-left, etc.).</li>
+    <li>Click "Add Signature" to apply it and download the signed document.</li>
+  </ol>
+
+  <h2>Why Choose LovePDFs?</h2>
+  <div class="benefits-grid">
+    
+      <div class="benefit-card">
+        <h4>Two signature modes</h4>
+        <p>Draw a handwritten signature or type your name in a cursive style.</p>
+      </div>
+      <div class="benefit-card">
+        <h4>Precise placement</h4>
+        <p>Choose exactly where on the page your signature appears.</p>
+      </div>
+      <div class="benefit-card">
+        <h4>Legally acceptable</h4>
+        <p>Digital signatures are widely accepted for most documents.</p>
+      </div>
+  </div>
+
+<!-- Google AdSense In-Content – Tool Page – In-Content -->
+<div class="adsense-wrap" style="text-align:center;padding:1rem;margin:2.5rem auto;max-width:400px;">
+  <ins class="adsbygoogle"
+       style="display:inline-block;width:300px;height:250px"
+       data-ad-client="ca-pub-1303178479491171"
+       data-ad-slot="5555555555"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list">
+    
+      <div class="faq-item">
+        <div class="faq-q">Is a digital signature legally binding?</div>
+        <p class="faq-a">In many jurisdictions, a digitally placed signature is considered valid. Check your local laws for specific legal requirements.</p>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I sign multiple pages?</div>
+        <p class="faq-a">Yes, you can apply the signature to all pages, odd pages, even pages, or just the last page.</p>
+      </div>
+  </div>
+
+  <h2>Related Tools</h2>
+  <div class="related-links">
+    <a href="../edit-pdf/index.html" class="related-chip">Edit PDF</a><a href="../protect-pdf/index.html" class="related-chip">Protect PDF</a><a href="../add-watermark-pdf/index.html" class="related-chip">Add Watermark to PDF</a>
+  </div>
+
+  <!-- CONTACT STRIP -->
+  <div class="contact-strip">
+    <h3>Need Help? Get in Touch</h3>
+    <p>Have a question, feedback, or feature request? We'd love to hear from you.</p>
+    <a href="mailto:huchusim@gmail.com">✉️ huchusim@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="simple-footer">
+  <p>
+    <strong>LovePDFs</strong> — Free PDF &amp; Image Tools &nbsp;·&nbsp;
+    Contact: <a href="mailto:huchusim@gmail.com">huchusim@gmail.com</a> &nbsp;·&nbsp;
+    &copy; 2025 All rights reserved &nbsp;·&nbsp;
+    <a href="../index.html">← All Tools</a>
+  </p>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-i" id="tIcon"></div>
+  <div><div class="toast-t" id="tTitle"></div><div class="toast-m" id="tMsg"></div></div>
+</div>
+
+<script src="../tools.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>
