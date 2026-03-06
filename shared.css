@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════
+   iLovePDFs — Shared Styles
+═══════════════════════════════════════════════ */
+:root {
+  --red:#E8321A; --red2:#FF5A3A; --red-glow:rgba(232,50,26,0.22);
+  --bg:#FDFCF9; --bg2:#F5F4EF; --bg3:#EEEDE7;
+  --card:#FFFFFF; --card2:#FAF9F6;
+  --border:#E4E2DA; --border2:#D6D4CC;
+  --text:#1C1C18; --text2:#3A3A34; --muted:#8C8C80; --muted2:#B8B8AC;
+  --green:#16A34A; --blue:#2563EB; --amber:#D97706; --purple:#7C3AED;
+  --shadow-xs:0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.07);
+  --shadow:0 4px 20px rgba(0,0,0,0.09);
+  --shadow-lg:0 12px 48px rgba(0,0,0,0.12);
+  --r:16px; --r-sm:10px; --r-xs:7px;
+}
+body.dark {
+  --bg:#0C0C0A; --bg2:#141410; --bg3:#1C1C18;
+  --card:#181814; --card2:#202018;
+  --border:#2C2C28; --border2:#383834;
+  --text:#F5F5EE; --text2:#C4C4BA; --muted:#6A6A60; --muted2:#4A4A44;
+  --shadow-xs:0 1px 2px rgba(0,0,0,0.4); --shadow-sm:0 2px 8px rgba(0,0,0,0.4);
+  --shadow:0 4px 20px rgba(0,0,0,0.5); --shadow-lg:0 12px 48px rgba(0,0,0,0.6);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;line-height:1.6;overflow-x:hidden;transition:background 0.3s,color 0.3s}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:'Instrument Sans',sans-serif}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+
+/* ── NAV ── */
+.site-nav{position:fixed;top:0;left:0;right:0;z-index:900;height:66px;background:rgba(253,252,249,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.25rem;padding:0 2rem}
+body.dark .site-nav{background:rgba(12,12,10,0.92)}
+.nav-logo{font-family:'Fraunces',serif;font-weight:900;font-size:1.3rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;flex-shrink:0;text-decoration:none}
+.nav-logo-ic{width:32px;height:32px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;color:#fff;font-weight:900;box-shadow:0 3px 12px var(--red-glow);font-family:'Instrument Sans',sans-serif}
+.nav-logo span{color:var(--red)}
+.nav-mid{display:flex;gap:0.25rem;margin-left:0.25rem}
+.nav-link{color:var(--muted);font-size:0.875rem;font-weight:600;padding:0.4rem 0.875rem;border-radius:9px;transition:all 0.2s;text-decoration:none}
+.nav-link:hover{color:var(--text);background:var(--bg2)}
+.nav-link.active{color:var(--red)}
+.nav-search-wrap{flex:1;max-width:380px;position:relative}
+.nav-search-wrap .ns-ic{position:absolute;left:0.875rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem;pointer-events:none}
+.nav-search-wrap input{width:100%;padding:0.52rem 1rem 0.52rem 2.5rem;border:1.5px solid var(--border);border-radius:11px;background:var(--bg2);color:var(--text);font-size:0.875rem;font-family:'Instrument Sans',sans-serif;transition:all 0.2s}
+.nav-search-wrap input:focus{outline:none;border-color:var(--red);background:var(--card);box-shadow:0 0 0 3px rgba(232,50,26,0.08)}
+.nav-right{display:flex;align-items:center;gap:0.6rem;margin-left:auto}
+.theme-btn{width:36px;height:36px;border:1.5px solid var(--border);border-radius:9px;background:var(--card);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s}
+.theme-btn:hover{border-color:var(--red);color:var(--red)}
+.nav-btn-o{padding:0.46rem 1rem;border:1.5px solid var(--border);border-radius:9px;font-size:0.85rem;font-weight:600;color:var(--text2);background:transparent;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center}
+.nav-btn-o:hover{border-color:var(--text);color:var(--text)}
+.nav-btn-f{padding:0.46rem 1rem;border:none;border-radius:9px;font-size:0.85rem;font-weight:700;color:#fff;background:var(--red);transition:all 0.2s;box-shadow:0 3px 10px var(--red-glow)}
+.nav-btn-f:hover{background:var(--red2);box-shadow:0 5px 18px var(--red-glow);transform:translateY(-1px)}
+
+/* ── PAGE WRAPPER ── */
+.page-wrap{padding-top:66px}
+
+/* ── INNER PAGE HERO ── */
+.inner-hero{padding:5rem 2rem 4rem;text-align:center;background:var(--bg2);border-bottom:1px solid var(--border)}
+.inner-hero-eyebrow{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.14em;color:var(--red);margin-bottom:0.75rem}
+.inner-hero h1{font-family:'Fraunces',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:900;letter-spacing:-0.03em;margin-bottom:1rem;color:var(--text)}
+.inner-hero p{color:var(--muted);font-size:1rem;max-width:550px;margin:0 auto;line-height:1.75}
+
+/* ── CONTENT SECTIONS ── */
+.content-section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+.content-section.narrow{max-width:780px}
+.content-card{background:var(--card);border:1.5px solid var(--border);border-radius:22px;padding:2.5rem;margin-bottom:1.5rem;transition:all 0.3s}
+.content-card:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+h2.section-h{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:900;letter-spacing:-0.025em;margin-bottom:1rem;color:var(--text)}
+h3.section-h3{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:0.6rem;color:var(--text)}
+p.body-p{font-size:0.92rem;color:var(--text2);line-height:1.75;margin-bottom:1rem}
+p.body-p:last-child{margin-bottom:0}
+ul.body-ul{padding-left:1.5rem;color:var(--text2);font-size:0.92rem;line-height:1.85}
+ul.body-ul li{margin-bottom:0.35rem}
+
+/* ── SIMPLE FOOTER ── */
+.simple-footer{padding:2.5rem 2rem;border-top:1px solid var(--border);text-align:center}
+.simple-footer p{font-size:0.8rem;color:var(--muted)}
+.simple-footer a{color:var(--red);text-decoration:none}
+.simple-footer a:hover{text-decoration:underline}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){.nav-mid{display:none}}
+@media(max-width:640px){.site-nav{padding:0 1rem;gap:0.75rem}.nav-search-wrap{display:none}}

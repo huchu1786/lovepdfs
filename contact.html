@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Contact Us – Get in Touch | iLovePDFs</title>
+<meta name="description" content="Contact the iLovePDFs team for support, feedback, or partnerships. We'd love to hear from you." />
+<link rel="canonical" href="https://lovepdfs.netlify.app/contact.html" />
+<meta name="robots" content="index, follow" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Contact Us | iLovePDFs" />
+<meta property="og:description" content="Get in touch with the iLovePDFs team for support, feedback, or partnerships." />
+<meta property="og:url" content="https://lovepdfs.netlify.app/contact.html" />
+<meta property="og:site_name" content="iLovePDFs" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23E8321A'/><text y='72' x='50' text-anchor='middle' font-size='58' font-family='Arial' font-weight='900' fill='white'>P</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.contact-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:2.5rem;max-width:1000px;margin:0 auto}
+.contact-info{display:flex;flex-direction:column;gap:1.25rem}
+.ci-card{background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:1.5rem;transition:all 0.3s}
+.ci-card:hover{border-color:rgba(232,50,26,0.25);transform:translateX(4px)}
+.ci-icon{font-size:1.5rem;margin-bottom:0.75rem;display:block}
+.ci-title{font-family:'Fraunces',serif;font-weight:700;font-size:0.97rem;margin-bottom:0.35rem}
+.ci-text{font-size:0.83rem;color:var(--muted);line-height:1.6}
+.ci-link{color:var(--red);text-decoration:none;font-weight:600}
+.ci-link:hover{text-decoration:underline}
+.contact-form{background:var(--card);border:1.5px solid var(--border);border-radius:22px;padding:2.25rem}
+.cf-title{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:900;margin-bottom:0.5rem}
+.cf-sub{font-size:0.85rem;color:var(--muted);margin-bottom:2rem;line-height:1.6}
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.cf-group{margin-bottom:1rem}
+.cf-label{display:block;font-size:0.78rem;font-weight:700;color:var(--text2);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em}
+.cf-input,.cf-select,.cf-textarea{width:100%;padding:0.75rem 1rem;border:1.5px solid var(--border);border-radius:11px;background:var(--bg2);color:var(--text);font-size:0.9rem;font-family:'Instrument Sans',sans-serif;transition:all 0.2s}
+.cf-input:focus,.cf-select:focus,.cf-textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(232,50,26,0.08);background:var(--card)}
+.cf-textarea{resize:vertical;min-height:130px;line-height:1.6}
+.cf-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238C8C80'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;cursor:pointer}
+.cf-submit{width:100%;padding:0.95rem;background:linear-gradient(135deg,var(--red),#FF5A3A);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;font-family:'Instrument Sans',sans-serif;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 6px 24px rgba(232,50,26,0.3)}
+.cf-submit:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(232,50,26,0.4)}
+.cf-success{display:none;background:rgba(22,163,74,0.07);border:1.5px solid rgba(22,163,74,0.2);border-radius:14px;padding:1.5rem;text-align:center;margin-top:1rem}
+.cf-success.on{display:block}
+.cf-success-ic{font-size:2.5rem;margin-bottom:0.75rem}
+.cf-success-title{font-family:'Fraunces',serif;font-weight:700;font-size:1.1rem;margin-bottom:0.35rem;color:var(--green)}
+.cf-success-text{font-size:0.85rem;color:var(--muted)}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2.5rem}
+.faq-item{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:1.35rem;transition:all 0.25s}
+.faq-item:hover{border-color:rgba(232,50,26,0.2);transform:translateY(-2px)}
+.faq-q{font-family:'Fraunces',serif;font-weight:700;font-size:0.95rem;margin-bottom:0.5rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
+.faq-a{font-size:0.83rem;color:var(--muted);line-height:1.65;display:none}
+.faq-item.open .faq-a{display:block}
+.faq-chevron{font-size:0.8rem;transition:transform 0.3s;flex-shrink:0}
+.faq-item.open .faq-chevron{transform:rotate(180deg)}
+@media(max-width:768px){.contact-grid{grid-template-columns:1fr}.cf-row{grid-template-columns:1fr}.faq-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="page-wrap">
+<nav class="site-nav">
+  <a href="index.html" class="nav-logo"><div class="nav-logo-ic">P</div>i<span>Love</span>PDFs</a>
+  <div class="nav-mid"><a href="index.html" class="nav-link">Home</a><a href="index.html#tools" class="nav-link">Tools</a><a href="features.html" class="nav-link">Features</a><a href="contact.html" class="nav-link active">Contact</a></div>
+  <div class="nav-right"><button class="theme-btn" id="themeBtn">🌙</button><a href="index.html#tools" class="nav-btn-f">Use Tools</a></div>
+</nav>
+
+<div class="inner-hero">
+  <div class="inner-hero-eyebrow">Get in Touch</div>
+  <h1>Contact Us</h1>
+  <p>Have a question, found a bug, or want to share feedback? We'd love to hear from you.</p>
+</div>
+
+<section style="padding:4rem 2rem">
+  <div class="contact-grid">
+    <!-- Info Cards -->
+    <div class="contact-info">
+      <div class="ci-card">
+        <span class="ci-icon">💬</span>
+        <div class="ci-title">General Enquiries</div>
+        <div class="ci-text">Questions about how tools work, feature requests, or just want to say hello.</div>
+        <a href="mailto:hello@ilovepdfs.com" class="ci-link" style="display:inline-block;margin-top:0.5rem">hello@ilovepdfs.com</a>
+      </div>
+      <div class="ci-card">
+        <span class="ci-icon">🐛</span>
+        <div class="ci-title">Bug Reports</div>
+        <div class="ci-text">Found something not working? Tell us the tool, browser, and what happened. We fix bugs fast.</div>
+        <a href="mailto:bugs@ilovepdfs.com" class="ci-link" style="display:inline-block;margin-top:0.5rem">bugs@ilovepdfs.com</a>
+      </div>
+      <div class="ci-card">
+        <span class="ci-icon">🔒</span>
+        <div class="ci-title">Privacy Questions</div>
+        <div class="ci-text">Questions about data handling, GDPR requests, or our Privacy Policy.</div>
+        <a href="mailto:privacy@ilovepdfs.com" class="ci-link" style="display:inline-block;margin-top:0.5rem">privacy@ilovepdfs.com</a>
+      </div>
+      <div class="ci-card">
+        <span class="ci-icon">🤝</span>
+        <div class="ci-title">Partnerships</div>
+        <div class="ci-text">Interested in integrating our tools or exploring a collaboration?</div>
+        <a href="mailto:partners@ilovepdfs.com" class="ci-link" style="display:inline-block;margin-top:0.5rem">partners@ilovepdfs.com</a>
+      </div>
+      <div class="ci-card" style="background:rgba(232,50,26,0.04);border-color:rgba(232,50,26,0.2)">
+        <span class="ci-icon">⚡</span>
+        <div class="ci-title">Response Time</div>
+        <div class="ci-text">We aim to reply within <strong>24–48 hours</strong> on business days. Bug reports are prioritized and usually addressed within hours.</div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="contact-form">
+      <div class="cf-title">Send us a message</div>
+      <div class="cf-sub">Fill in the form below and we'll get back to you as soon as possible.</div>
+      <div id="cfForm">
+        <div class="cf-row">
+          <div class="cf-group"><label class="cf-label">First Name *</label><input type="text" class="cf-input" id="cf_fname" placeholder="John" required></div>
+          <div class="cf-group"><label class="cf-label">Last Name *</label><input type="text" class="cf-input" id="cf_lname" placeholder="Smith" required></div>
+        </div>
+        <div class="cf-group"><label class="cf-label">Email Address *</label><input type="email" class="cf-input" id="cf_email" placeholder="john@example.com" required></div>
+        <div class="cf-group"><label class="cf-label">Subject *</label>
+          <select class="cf-select" id="cf_subject">
+            <option value="">— Select a topic —</option>
+            <option value="general">General Question</option>
+            <option value="bug">Bug Report</option>
+            <option value="feature">Feature Request</option>
+            <option value="privacy">Privacy / GDPR</option>
+            <option value="partnership">Partnership Enquiry</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="cf-group"><label class="cf-label">Message *</label><textarea class="cf-textarea" id="cf_message" placeholder="Describe your question or issue in detail. For bug reports, please include: the tool you were using, your browser/OS, and what happened…"></textarea></div>
+        <div class="cf-group" style="display:flex;align-items:flex-start;gap:0.6rem">
+          <input type="checkbox" id="cf_privacy" style="margin-top:3px;accent-color:var(--red)">
+          <label for="cf_privacy" style="font-size:0.82rem;color:var(--muted);cursor:pointer">I agree to the <a href="privacy.html" style="color:var(--red)">Privacy Policy</a> and consent to iLovePDFs storing my message for the purpose of responding to my enquiry.</label>
+        </div>
+        <button class="cf-submit" onclick="submitForm()">📨 Send Message</button>
+      </div>
+      <div class="cf-success" id="cfSuccess">
+        <div class="cf-success-ic">✅</div>
+        <div class="cf-success-title">Message Sent!</div>
+        <div class="cf-success-text">Thank you for reaching out. We'll reply to your email within 24–48 hours.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section style="padding:3rem 2rem 5rem;max-width:1000px;margin:0 auto">
+  <div class="sec-eyebrow" style="text-align:center;font-size:0.72rem;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:var(--red);margin-bottom:0.75rem">FAQ</div>
+  <h2 style="font-family:'Fraunces',serif;font-size:2rem;font-weight:900;letter-spacing:-0.025em;text-align:center;margin-bottom:0.5rem">Common Questions</h2>
+  <p style="text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:0">Quick answers before you reach out.</p>
+  <div class="faq-grid">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Are my files actually private? <span class="faq-chevron">▼</span></div>
+      <div class="faq-a">Yes — completely. All processing happens in your browser using WebAssembly. Your files never leave your device. We literally cannot see them even if we wanted to.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Why is PDF to Word an HTML/ZIP file? <span class="faq-chevron">▼</span></div>
+      <div class="faq-a">True .docx conversion requires server-side tools. Our browser-based version extracts text with layout analysis and packages it as HTML (which Word can open directly) + TXT. Open the HTML file in Microsoft Word, then File → Save As → .docx.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Is there a file size limit? <span class="faq-chevron">▼</span></div>
+      <div class="faq-a">There's no enforced limit — it depends on your device's RAM. Most modern browsers handle files up to 500MB comfortably. Very large files may slow down processing on older devices.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Why doesn't watermarking use full encryption? <span class="faq-chevron">▼</span></div>
+      <div class="faq-a">Full AES-256 encryption requires server-side processing because browsers don't expose the cryptographic primitives needed. Our protect tool adds metadata markers — for enterprise-grade encryption, use Adobe Acrobat.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Can I use iLovePDFs for commercial work? <span class="faq-chevron">▼</span></div>
+      <div class="faq-a">Yes! iLovePDFs is free for personal and commercial use. The only restriction is you must own or have permission to process the documents you upload.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Which browsers are supported? <span class="faq-chevron">▼</span></div>
+      <div class="faq-a">Any modern browser works: Chrome 80+, Firefox 75+, Safari 14+, Edge 80+. We recommend Chrome or Edge for the best WebAssembly performance.</div>
+    </div>
+  </div>
+</section>
+
+<div class="simple-footer"><p>© 2025 iLovePDFs · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="contact.html">Contact</a> · <a href="index.html">Home</a></p></div>
+
+<script>
+function submitForm(){
+  const fname=document.getElementById('cf_fname').value.trim();
+  const email=document.getElementById('cf_email').value.trim();
+  const subject=document.getElementById('cf_subject').value;
+  const msg=document.getElementById('cf_message').value.trim();
+  const privacy=document.getElementById('cf_privacy').checked;
+  if(!fname||!email||!subject||!msg){alert('Please fill in all required fields.');return;}
+  if(!privacy){alert('Please agree to the Privacy Policy to continue.');return;}
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){alert('Please enter a valid email address.');return;}
+  document.getElementById('cfForm').style.display='none';
+  document.getElementById('cfSuccess').classList.add('on');
+}
+function toggleFaq(el){el.classList.toggle('open');}
+document.getElementById('themeBtn').onclick=function(){document.body.classList.toggle('dark');this.textContent=document.body.classList.contains('dark')?'☀️':'🌙';};
+if(localStorage.getItem('theme')==='dark'){document.body.classList.add('dark');document.getElementById('themeBtn').textContent='☀️';}
+</script>
+</body>
+</html>
