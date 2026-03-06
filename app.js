@@ -34,7 +34,31 @@ function renderTools(search=''){
 }
 
 function toolCard(t){
-  return `<a class="tool-card" href="javascript:void(0)" onclick="openTool('${t.id}')">
+  // Check if we are on the homepage index.html or another page
+  const isHome = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html');
+  // Find URL path mapping from TOOLS_SEO if possible, or fallback to hash-based modal
+  const seoData = typeof module !== 'undefined' ? [] : (window.TOOLS_SEO || []);  
+  
+  // To avoid needing tools-data.js everywhere on the client, we'll route based on standard slug if we're on Home
+  const toolSlug = t.id; // Usually mapped, we'll dynamically use the known standard slugs
+  
+  // Very simple client-side slug mapping (assuming tools map 1:1 with typical SEO IDs, or just map them explicitly)
+  const slugMap = {
+    'merge': 'merge-pdf', 'compress': 'compress-pdf', 'split': 'split-pdf', 'rotate': 'rotate-pdf',
+    'unlock': 'unlock-pdf', 'protect': 'protect-pdf', 'watermark': 'add-watermark-pdf', 'removepg': 'remove-pages-pdf',
+    'organize': 'organize-pdf', 'crop': 'crop-pdf', 'pdf2word': 'pdf-to-word', 'pdf2xls': 'pdf-to-excel',
+    'ppt2pdf': 'ppt-to-pdf', 'pdf2jpg': 'pdf-to-jpg', 'word2pdf': 'word-to-pdf', 'xls2pdf': 'excel-to-pdf',
+    'jpg2pdf': 'jpg-to-pdf', 'resize_img': 'resize-image', 'crop_img': 'crop-image', 'compress_img': 'compress-image',
+    'jpg2png_img': 'jpg-to-png', 'png2jpg_img': 'png-to-jpg',
+    'editpdf': 'edit-pdf', 'extract': 'extract-pages-pdf', 'repair': 'repair-pdf', 'ocr': 'ocr-extract-text',
+    'sign': 'sign-pdf', 'redact': 'redact-pdf', 'compare': 'compare-pdf', 'html2pdf': 'html-to-pdf',
+    'pdf2pdfa': 'pdf-to-pdfa', 'pagenums': 'add-page-numbers-pdf', 'pdf2ppt': 'pdf-to-ppt'
+  };
+  
+  const href = isHome ? (slugMap[t.id] ? `./${slugMap[t.id]}/index.html` : `javascript:openTool('${t.id}')`) : 
+               (slugMap[t.id] ? `../${slugMap[t.id]}/index.html` : `javascript:openTool('${t.id}')`);
+               
+  return `<a class="tool-card" href="${href}">
     ${t.badge?`<div class="tc-badge bg-${t.badge}">${t.badge}</div>`:''}
     <div class="tc-shine"></div>
     <div class="tc-icon" style="background:${t.clr}12;color:${t.clr}">${t.icon}</div>
@@ -56,6 +80,26 @@ renderCats();renderTools('');
 // ── MODAL ────────────────────────────────────────────────────────
 function openTool(id){
   const t=TOOLS.find(x=>x.id===id);
+  if(!t)return;
+  
+  const mBody = document.getElementById('mBody');
+  const overlay = document.getElementById('overlay');
+  const workspace = document.getElementById('toolWorkspace');
+  
+  STATE[id]={files:[],result:null};
+
+  // If we are on a dedicated tool page, mount INLINE
+  if (workspace) {
+    workspace.innerHTML = buildUI(id);
+    setupDZ(id);
+    if(id==='compare'){setupCmpDZ('A');setupCmpDZ('B');document.getElementById('bg_compare').disabled=true;}
+    if(id==='html2pdf') document.getElementById('bg_html2pdf').disabled=false;
+    return;
+  }
+
+  // Otherwise, fallback to Modal (classic behavior)
+  if(!overlay)return;
+  
   document.getElementById('mIcon').style.background=t.clr+'14';
   document.getElementById('mIcon').style.color=t.clr;
   document.getElementById('mIcon').style.borderRadius='13px';
@@ -68,17 +112,28 @@ function openTool(id){
   document.getElementById('mIcon').textContent=t.icon;
   document.getElementById('mTitle').textContent=t.name;
   document.getElementById('mSub').textContent=t.desc;
-  document.getElementById('mBody').innerHTML=buildUI(id);
-  STATE[id]={files:[],result:null};
-  document.getElementById('overlay').classList.add('open');
+  
+  if(mBody) {
+    mBody.innerHTML=buildUI(id);
+    setupDZ(id);
+    if(id==='compare'){setupCmpDZ('A');setupCmpDZ('B');document.getElementById('bg_compare').disabled=true;}
+    if(id==='html2pdf') document.getElementById('bg_html2pdf').disabled=false;
+  }
+
+  overlay.classList.add('open');
   document.body.style.overflow='hidden';
-  setupDZ(id);
-  if(id==='compare'){setupCmpDZ('A');setupCmpDZ('B');document.getElementById('bg_compare').disabled=true;}
-  if(id==='html2pdf') document.getElementById('bg_html2pdf').disabled=false;
 }
-function closeModal(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';}
+function closeModal(){const ov=document.getElementById('overlay');if(ov)ov.classList.remove('open');document.body.style.overflow='';}
 function closeOvOut(e){if(e.target===document.getElementById('overlay'))closeModal();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// Auto-mount inline if on dedicated page
+window.addEventListener('DOMContentLoaded', () => {
+  const ds = document.body.dataset.toolId;
+  if(ds) {
+    openTool(ds);
+  }
+});
 
 // ── BUILD UI ─────────────────────────────────────────────────────
 function S(id,lbl,opts,def=''){return `<div class="opt-g"><div class="opt-l">${lbl}</div><select class="opt-s" id="${id}">${opts.map(([v,l])=>`<option value="${v}"${v===def?' selected':''}>${l}</option>`).join('')}</select></div>`;}
@@ -119,12 +174,18 @@ function buildUI(id){
     case 'sign': return DZ(id,'.pdf',false)+`<div id="sign_panel" style="display:none;margin-bottom:1.25rem"><div class="sign-tabs" id="signTabs"><button class="sign-tab on" onclick="setSignTab('draw',this)">✏️ Draw Signature</button><button class="sign-tab" onclick="setSignTab('type',this)">⌨️ Type Signature</button></div><div id="signDraw"><div class="sign-canvas-wrap"><div class="sign-cbar">Draw your signature below <button class="sign-clr-btn" onclick="clearSign()">Clear</button></div><canvas id="signC" width="620" height="130"></canvas></div><div class="opt-row">`+S('sign_pos','Place On',[['last','Last Page Only'],['all','All Pages'],['first','First Page Only']],'last')+S('sign_corner','Position',[['br','Bottom Right'],['bl','Bottom Left'],['bc','Bottom Center'],['tr','Top Right']],'br')+`</div></div><div id="signType" style="display:none"><input class="sign-typed" id="signTyped" placeholder="Your Name…"><div class="opt-row">`+S('sign_style','Style',[['normal','Normal'],['italic','Cursive Style'],['bold','Bold']],'italic')+S('sign_sz','Size',[['sm','Small'],['md','Medium'],['lg','Large']],'md')+`</div></div></div>`+PROG(id)+RES(id)+ACTS(id);
     case 'redact': return DZ(id,'.pdf',false)+`<div class="redact-notice">⚠️ Redaction permanently removes content. Select regions by dragging over the area to hide. This cannot be undone.</div><div id="redact_panel" style="display:none"><div class="rd-viewer"><div class="viewer-bar"><span class="v-info" id="rd_info">Page 1/1</span><button class="vbtn" onclick="rdPrev()">◀</button><button class="vbtn" onclick="rdNext()">▶</button><span style="font-size:0.75rem;color:var(--muted);margin-left:auto">Click and drag to select area</span></div><div class="rd-canvas-wrap"><canvas id="rdC"></canvas><canvas id="rdO"></canvas></div></div></div>`+PROG(id)+RES(id)+ACTS(id);
     case 'compare': return `<div class="cmp-cols"><div class="cmp-col"><div class="cmp-col-hd">📄 Original (A)</div><div class="cmp-zone" onclick="document.getElementById('fi_cmpA').click()"><div class="dzone" id="dz_cmpA" style="padding:1.5rem"><span class="dzone-icon" style="font-size:1.6rem">📄</span><h3 style="font-size:0.875rem">Upload PDF A</h3><div class="dzone-btn" style="padding:0.4rem 1rem;font-size:0.75rem">Choose</div></div><input type="file" id="fi_cmpA" accept=".pdf" style="display:none" onchange="onCmpFile('A',this.files)"></div><div class="cmp-canvas"><canvas id="cmpCA" style="max-width:100%"></canvas></div></div><div class="cmp-col"><div class="cmp-col-hd">📋 Revised (B)</div><div class="cmp-zone" onclick="document.getElementById('fi_cmpB').click()"><div class="dzone" id="dz_cmpB" style="padding:1.5rem"><span class="dzone-icon" style="font-size:1.6rem">📋</span><h3 style="font-size:0.875rem">Upload PDF B</h3><div class="dzone-btn" style="padding:0.4rem 1rem;font-size:0.75rem">Choose</div></div><input type="file" id="fi_cmpB" accept=".pdf" style="display:none" onchange="onCmpFile('B',this.files)"></div><div class="cmp-canvas"><canvas id="cmpCB" style="max-width:100%"></canvas></div></div></div><div style="font-size:0.78rem;color:var(--muted);text-align:center;margin-bottom:1.25rem">Upload both PDFs to enable comparison</div>`+PROG('compare')+RES('compare')+`<div class="act-row"><button class="btn-go" id="bg_compare" onclick="run('compare')">🔀 Compare PDFs</button><button class="btn-dl" id="bd_compare" onclick="doDownload('compare')">⬇ Download</button><button class="btn-rst" onclick="resetT('compare')">↺ Reset</button></div>`;
+    case 'resize_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+OPTS(id,I('ri_w','Width (px)','number','e.g. 1920')+I('ri_h','Height (px)','number','e.g. 1080'))+PROG(id)+RES(id)+ACTS(id);
+    case 'crop_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+OPTS(id,I('ci_aspect','Aspect Ratio (e.g. 16:9, 1:1, or free)','text','free','free'))+PROG(id)+RES(id)+ACTS(id);
+    case 'compress_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+OPTS(id,S('coi_q','Quality',[['0.9','Best Quality (90%)'],['0.75','Good Balance (75%)'],['0.5','Smallest Size (50%)']],'0.75'))+PROG(id)+RES(id)+ACTS(id);
+    case 'jpg2png_img': return DZ(id,'.jpg,.jpeg',false)+PROG(id)+RES(id)+ACTS(id);
+    case 'png2jpg_img': return DZ(id,'.png',false)+PROG(id)+RES(id)+ACTS(id);
     default: return '<p style="color:var(--muted)">Coming soon!</p>';
   }
 }
 
 function label(id){
-  const m={merge:'🔗 Merge PDFs',split:'✂️ Split PDF',removepg:'🗑️ Delete Pages',extract:'📤 Extract Pages',organize:'📋 Apply Order',compress:'🗜️ Compress PDF',repair:'🔧 Repair PDF',ocr:'🔡 Extract Text',jpg2pdf:'📷 Convert to PDF',word2pdf:'📝 Convert to PDF',ppt2pdf:'📊 Convert to PDF',xls2pdf:'📈 Convert to PDF',html2pdf:'🌐 Convert to PDF',pdf2jpg:'🖼️ Convert to Images',pdf2word:'📄 Convert to Word',pdf2xls:'📊 Export to CSV',pdf2pdfa:'🗂️ Convert to PDF/A',rotate:'🔄 Rotate Pages',watermark:'💧 Apply Watermark',pagenums:'🔢 Add Page Numbers',crop:'🔲 Crop Pages',editpdf:'✏️ Save Annotated PDF',unlock:'🔓 Unlock PDF',protect:'🔐 Protect PDF',sign:'✍️ Add Signature',redact:'⬛ Apply Redactions',compare:'🔀 Compare PDFs'};
+  const m={merge:'🔗 Merge PDFs',split:'✂️ Split PDF',removepg:'🗑️ Delete Pages',extract:'📤 Extract Pages',organize:'📋 Apply Order',compress:'🗜️ Compress PDF',repair:'🔧 Repair PDF',ocr:'🔡 Extract Text',jpg2pdf:'📷 Convert to PDF',word2pdf:'📝 Convert to PDF',ppt2pdf:'📊 Convert to PDF',xls2pdf:'📈 Convert to PDF',html2pdf:'🌐 Convert to PDF',pdf2jpg:'🖼️ Convert to Images',pdf2word:'📄 Convert to Word',pdf2xls:'📊 Export to CSV',pdf2pdfa:'🗂️ Convert to PDF/A',rotate:'🔄 Rotate Pages',watermark:'💧 Apply Watermark',pagenums:'🔢 Add Page Numbers',crop:'🔲 Crop Pages',editpdf:'✏️ Save Annotated PDF',unlock:'🔓 Unlock PDF',protect:'🔐 Protect PDF',sign:'✍️ Add Signature',redact:'⬛ Apply Redactions',compare:'🔀 Compare PDFs',
+  resize_img:'↔️ Resize Image', crop_img:'✂️ Crop Image', compress_img:'🗜️ Compress Image', jpg2png_img:'🔄 Convert to PNG', png2jpg_img:'🔄 Convert to JPG'};
   return m[id]||'⚙️ Process';
 }
 
@@ -227,6 +288,11 @@ async function run(id){
       case 'sign':     await doSign(s);break;
       case 'redact':   await doRedact(s);break;
       case 'compare':  await doCompare(s);break;
+      case 'resize_img': await doResizeImg(s);break;
+      case 'crop_img':   await doCropImg(s);break;
+      case 'compress_img': await doCompressImg(s);break;
+      case 'jpg2png_img': await doJpg2Png(s);break;
+      case 'png2jpg_img': await doPng2Jpg(s);break;
     }
     showToast('✅','Done!','Your file is ready to download.','ok');
   }catch(e){
