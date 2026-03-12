@@ -8,7 +8,7 @@ const TOOLS = [
   {id:'split',     name:'Split PDF',          desc:'Separate one page or a whole set',                 icon:'✂️', clr:'#F59E0B', cat:'organize'},
   {id:'removepg',  name:'Remove Pages',       desc:'Delete specific pages from PDF',                   icon:'🗑️', clr:'#EF4444', cat:'organize'},
   {id:'extract',   name:'Extract Pages',      desc:'Pull out specific pages as new PDF',               icon:'📤', clr:'#14B8A6', cat:'organize'},
-  {id:'organize',  name:'Organize PDF',       desc:'Drag-and-drop page reordering',                    icon:'📋', clr:'#F97316', cat:'organize'},
+  {id:'organize',  name:'Organize PDF',       desc:'Drag-and-drop page reordering',                    icon:'📂', clr:'#F97316', cat:'organize'},
   {id:'compress',  name:'Compress PDF',       desc:'Reduce file size, optimise quality',               icon:'🗜️', clr:'#8B5CF6', cat:'optimize'},
   {id:'repair',    name:'Repair PDF',         desc:'Fix damaged PDFs and recover data',                icon:'🔧', clr:'#06B6D4', cat:'optimize'},
   {id:'ocr',       name:'OCR / Extract Text', desc:'Extract text from PDF pages',                      icon:'🔡', clr:'#22C55E', cat:'optimize', badge:'new'},
@@ -42,6 +42,7 @@ const TOOLS = [
   {id:'removeann',   name:'Remove Annotations',  desc:'Strip all highlights, comments and markups',       icon:'🧹', clr:'#6366F1', cat:'edit'},
   {id:'deskew',      name:'Deskew PDF',          desc:'Auto-straighten crooked scanned pages',            icon:'📐', clr:'#22C55E', cat:'optimize', badge:'new'},
   {id:'pdf2txt',     name:'PDF to Text',         desc:'Extract all text from PDF to a .txt file',         icon:'📃', clr:'#F59E0B', cat:'convert'},
+  {id:'nup',         name:'N-up (Multiple Pages per Sheet)', desc:'Print multiple pages per sheet',       icon:'📄', clr:'#10B981', cat:'organize'},
 
   // ── IMAGE TOOLS ──
   {id:'resize_img',name:'Resize Image',       desc:'Change image dimensions',                          icon:'↔️', clr:'#14B8A6', cat:'image'},
@@ -49,6 +50,16 @@ const TOOLS = [
   {id:'compress_img',name:'Compress Image',   desc:'Reduce image file size',                           icon:'🗜️', clr:'#8B5CF6', cat:'image'},
   {id:'jpg2png_img',name:'JPG to PNG',        desc:'Convert JPEG to PNG',                              icon:'🔄', clr:'#EC4899', cat:'image'},
   {id:'png2jpg_img',name:'PNG to JPG',        desc:'Convert PNG to JPEG',                              icon:'🔄', clr:'#DB2777', cat:'image'},
+
+  // ── CALCULATORS ──
+  {id:'age_calc',      name:'Age Calculator',        desc:'Calculate your exact age in years, months & days',   icon:'🎂', clr:'#F59E0B', cat:'calculators'},
+  {id:'word_counter',  name:'Word Counter',           desc:'Count words, characters, sentences & reading time',  icon:'📖', clr:'#14B8A6', cat:'calculators'},
+  {id:'pct_calc',      name:'Percentage Calculator',  desc:'Calculate percentages, ratios and percentage change', icon:'📊', clr:'#8B5CF6', cat:'calculators'},
+  {id:'gst_calc',      name:'GST Calculator',         desc:'GST inclusive & exclusive calculator with breakdown', icon:'🧾', clr:'#16A34A', cat:'calculators'},
+  {id:'loan_calc',     name:'Loan Calculator',        desc:'Monthly EMI & full amortization repayment schedule',  icon:'💰', clr:'#E8321A', cat:'calculators', badge:'new'},
+  {id:'bmi_calc',      name:'BMI Calculator',         desc:'Body mass index with healthy range indicator',        icon:'⚖️', clr:'#0891B2', cat:'calculators', badge:'new'},
+  {id:'date_calc',     name:'Date Calculator',        desc:'Days between dates, add/subtract days & day of week', icon:'📅', clr:'#7C3AED', cat:'calculators', badge:'new'},
+  {id:'currency',      name:'Currency Converter',     desc:'Live exchange rates for 60+ world currencies',        icon:'💱', clr:'#DB2777', cat:'calculators', badge:'new'},
 ];
 
 const CATS = [
@@ -59,16 +70,18 @@ const CATS = [
   {id:'edit',label:'✏️ Edit'},
   {id:'security',label:'🔐 Security'},
   {id:'image',label:'🖼️ Image Tools', badge:'new'},
+  {id:'calculators',label:'🧠 Calculators', badge:'new'},
   {id:'advanced',label:'🧰 Advanced',badge:'new'},
 ];
 
 const CAT_GROUPS = {
-  organize:{label:'📂 Organize PDF',tools:['merge','split','removepg','extract','organize','altmix']},
+  organize:{label:'📂 Organize PDF',tools:['organize','merge','split','removepg','extract','altmix','nup']},
   optimize:{label:'⚡ Optimize PDF',tools:['compress','repair','ocr','grayscale','flatten','deskew']},
   convert:{label:'🔄 Convert',tools:['jpg2pdf','word2pdf','ppt2pdf','xls2pdf','html2pdf','pdf2jpg','pdf2word','pdf2xls','pdf2pdfa','pdf2txt']},
   edit:{label:'✏️ Edit PDF',tools:['rotate','watermark','pagenums','crop','editpdf','editMeta','extractImg','resizepdf','headfoot','removeann']},
   security:{label:'🔐 PDF Security',tools:['unlock','protect','sign','redact','compare']},
   image:{label:'🖼️ Image Tools',tools:['resize_img','crop_img','compress_img','jpg2png_img','png2jpg_img']},
+  calculators:{label:'🧠 Calculators & Tools',tools:['age_calc','word_counter','pct_calc','gst_calc','loan_calc','bmi_calc','date_calc','currency']},
   advanced:{label:'🧰 Advanced PDF',tools:['grayscale','flatten','editMeta','extractImg','resizepdf','altmix','headfoot','removeann','deskew','pdf2txt']},
 };
 
@@ -210,15 +223,87 @@ async function doOrganize(s){
 }
 
 async function doCompress(s){
-  setP('compress',30,'Loading…');
-  const ab=await s.files[0].arrayBuffer(), pdf=await PDFDocument.load(ab,{updateMetadata:false});
-  const lvl=document.getElementById('cmp_lvl').value;
-  setP('compress',72,'Compressing…');
-  const bytes=await pdf.save({useObjectStreams:lvl!=='low'});
-  const ratio=((1-bytes.length/ab.byteLength)*100).toFixed(1);
-  s.result={type:'pdf',bytes,filename:s.files[0].name.replace('.pdf','_compressed.pdf')};
-  showRes('compress','Compressed!',`${fmtSize(ab.byteLength)} → ${fmtSize(bytes.length)} (${ratio>0?'-'+ratio:'+'+Math.abs(ratio)}%)`); hideP('compress');
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  const origSize=file.size;
+  const lvl=document.getElementById('cmp_lvl')?.value||'med';
+
+  setP('compress',5,'Loading PDF…');
+  const ab=await file.arrayBuffer();
+
+  // ── Helper: render PDF to rasterised JPEG PDF ──────────────────
+  async function rasterise(scale, quality, grayscale){
+    const pjsDoc=await pjsLoad(ab);
+    const total=pjsDoc.numPages;
+    const imgPdf=await PDFDocument.create();
+    for(let i=1;i<=total;i++){
+      const pg=await pjsDoc.getPage(i);
+      const vp=pg.getViewport({scale});
+      const cv=document.createElement('canvas');
+      cv.width=Math.floor(vp.width); cv.height=Math.floor(vp.height);
+      const ctx=cv.getContext('2d');
+      ctx.fillStyle='white'; ctx.fillRect(0,0,cv.width,cv.height);
+      await pg.render({canvasContext:ctx,viewport:vp}).promise;
+      if(grayscale){
+        const id=ctx.getImageData(0,0,cv.width,cv.height),d=id.data;
+        for(let j=0;j<d.length;j+=4){const g=0.299*d[j]+0.587*d[j+1]+0.114*d[j+2];d[j]=d[j+1]=d[j+2]=g;}
+        ctx.putImageData(id,0,0);
+      }
+      const jb=await new Promise(r=>cv.toBlob(b=>b.arrayBuffer().then(r),'image/jpeg',quality));
+      const img=await imgPdf.embedJpg(jb);
+      const ptW=vp.width/scale, ptH=vp.height/scale;
+      const np=imgPdf.addPage([ptW,ptH]);
+      np.drawImage(img,{x:0,y:0,width:ptW,height:ptH});
+    }
+    return imgPdf.save({useObjectStreams:true});
+  }
+
+  // ── Strategy A: Structural optimization (lossless, always first) ─
+  setP('compress',15,'Structural optimisation…');
+  const pdfLib=await PDFDocument.load(ab,{updateMetadata:false,throwOnInvalidObject:false});
+  pdfLib.setTitle('');pdfLib.setAuthor('');pdfLib.setKeywords([]);
+  pdfLib.setSubject('');pdfLib.setCreator('iLovePDFs');pdfLib.setProducer('');
+  const structBytes=await pdfLib.save({useObjectStreams:true});
+  let bestBytes=structBytes;
+  let method='Structure optimised';
+
+  if(lvl==='low'){
+    // LOW: lossless structural only — done
+    setP('compress',90,'Finalising…');
+  } else if(lvl==='med'){
+    // MEDIUM: 50% quality
+    setP('compress',35,'Recompressing pages (50% quality)…');
+    try{
+      const canvasBytes=await rasterise(1.1, 0.50, false);
+      setP('compress',85,'Comparing results…');
+      if(canvasBytes.length<bestBytes.length){bestBytes=canvasBytes;method='Recompressed at 50% quality';}
+    }catch(e){}
+  } else {
+    // HIGH: 25% quality (most aggressive)
+    setP('compress',30,'Recompressing pages (25% quality)…');
+    try{
+      const canvasBytes=await rasterise(1.0, 0.25, false);
+      if(canvasBytes.length<bestBytes.length){bestBytes=canvasBytes;method='Recompressed at 25% quality';}
+    }catch(e){}
+    setP('compress',60,'Trying grayscale reduction…');
+    try{
+      const gsBytes=await rasterise(0.85, 0.25, true);
+      if(gsBytes.length<bestBytes.length){bestBytes=gsBytes;method='Grayscale + 25% quality';}
+    }catch(e){}
+    setP('compress',88,'Comparing all methods…');
+  }
+
+  setP('compress',96,'Saving…');
+  const saved=(1-bestBytes.length/origSize)*100;
+  let savedStr;
+  if(saved>=1) savedStr=`-${saved.toFixed(1)}% · ${method}`;
+  else if(saved>0) savedStr=`-${saved.toFixed(1)}% · ${method}`;
+  else savedStr=`PDF is already fully optimised (${method})`;
+
+  s.result={type:'pdf',bytes:bestBytes,filename:file.name.replace('.pdf','_compressed.pdf')};
+  showRes('compress','Done!',`${fmtSize(origSize)} → ${fmtSize(bestBytes.length)} (${savedStr})`); hideP('compress');
 }
+
+
 
 async function doRepair(s){
   setP('repair',25,'Loading damaged file…');
@@ -910,38 +995,44 @@ function uiGrayscale(el){
     <div class="result-box" id="rb_grayscale"><div class="result-ic">✅</div><div><div class="result-t" id="rt_grayscale"></div><div class="result-m" id="rm_grayscale"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_grayscale" onclick="run('grayscale')" disabled>⚫ Convert to Grayscale</button>
-      <a class="btn-dl" id="bd_grayscale">⬇️ Download</a>
+      <button class="btn-dl" id="bd_grayscale" onclick="doDownload('grayscale')">⬇️ Download</button>
     </div>`;
-  setupDZ('gray','f_grayscale',['application/pdf']);
+  setupDZ('grayscale');
 }
 async function doGrayscale(s){
   const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
-  setP('grayscale',10,'Loading PDF…');
+  const origSize=file.size;
+  setP('grayscale',5,'Loading PDF…');
   const ab=await file.arrayBuffer();
   const pjsDoc=await pjsLoad(ab);
   const total=pjsDoc.numPages;
   const newPdf=await PDFDocument.create();
   for(let i=1;i<=total;i++){
-    setP('grayscale',10+(i/total)*80,`Converting page ${i}/${total}…`);
+    setP('grayscale',5+(i/total)*88,`Converting page ${i}/${total}…`);
     const pg=await pjsDoc.getPage(i);
-    const vp=pg.getViewport({scale:2});
-    const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height;
-    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    const vp=pg.getViewport({scale:1.5});  // 1.5x = ~108 DPI — sharp yet compact
+    const cv=document.createElement('canvas'); cv.width=Math.floor(vp.width); cv.height=Math.floor(vp.height);
     const ctx=cv.getContext('2d');
-    const id=ctx.getImageData(0,0,cv.width,cv.height);
-    const d=id.data;
+    ctx.fillStyle='white'; ctx.fillRect(0,0,cv.width,cv.height);
+    await pg.render({canvasContext:ctx,viewport:vp}).promise;
+    // Desaturate: luminance = 0.299R + 0.587G + 0.114B
+    const id=ctx.getImageData(0,0,cv.width,cv.height), d=id.data;
     for(let j=0;j<d.length;j+=4){const g=0.299*d[j]+0.587*d[j+1]+0.114*d[j+2];d[j]=d[j+1]=d[j+2]=g;}
     ctx.putImageData(id,0,0);
-    const jb=await new Promise(r=>cv.toBlob(b=>b.arrayBuffer().then(r),'image/jpeg',0.9));
+    const jb=await new Promise(r=>cv.toBlob(b=>b.arrayBuffer().then(r),'image/jpeg',0.85));
     const img=await newPdf.embedJpg(jb);
-    const {width,height}=img.scale(1);
-    const np=newPdf.addPage([width/2,height/2]);
-    np.drawImage(img,{x:0,y:0,width:width/2,height:height/2});
+    // page size = original viewport in PDF points (divide by scale factor to get original pt size)
+    const ptW=vp.width/1.5, ptH=vp.height/1.5;
+    const np=newPdf.addPage([ptW,ptH]);
+    np.drawImage(img,{x:0,y:0,width:ptW,height:ptH});
   }
-  const bytes=await newPdf.save();
+  const bytes=await newPdf.save({useObjectStreams:true});
+  const saved=((1-bytes.length/origSize)*100).toFixed(1);
   s.result={type:'pdf',bytes,filename:'grayscale_'+file.name};
-  showRes('grayscale','Grayscale Done!',`${total} pages converted`); hideP('grayscale');
+  showRes('grayscale','Grayscale Done!',`${total} pages · ${fmtSize(origSize)} → ${fmtSize(bytes.length)} (${saved>=0?'-'+saved:'~same'}%)`); hideP('grayscale');
 }
+
+
 
 // ── FLATTEN PDF ───────────────────────────────────────────────
 function uiFlatten(el){
@@ -957,9 +1048,9 @@ function uiFlatten(el){
     <div class="result-box" id="rb_flatten"><div class="result-ic">✅</div><div><div class="result-t" id="rt_flatten"></div><div class="result-m" id="rm_flatten"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_flatten" onclick="run('flatten')" disabled>📄 Flatten PDF</button>
-      <a class="btn-dl" id="bd_flatten">⬇️ Download</a>
+      <button class="btn-dl" id="bd_flatten" onclick="doDownload('flatten')">⬇️ Download</button>
     </div>`;
-  setupDZ('flat','f_flatten',['application/pdf']);
+  setupDZ('flatten');
 }
 async function doFlatten(s){
   const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
@@ -982,7 +1073,7 @@ function uiEditMeta(el){
       <p>Change title, author, subject and keywords</p>
       <div class="dzone-btn">📂 Choose PDF</div>
     </div>
-    <input type="file" id="fi_editMeta" accept=".pdf" hidden>
+    <input type="file" id="fi_editMeta" accept=".pdf" hidden onchange="onFiles('editMeta',this.files)">
     <div class="flist" id="fl_editMeta"></div>
     <div class="opt-section" id="metaOpts" style="display:none">
       <div class="opt-section-title">Document Metadata</div>
@@ -999,7 +1090,7 @@ function uiEditMeta(el){
     <div class="result-box" id="rb_editMeta"><div class="result-ic">✅</div><div><div class="result-t" id="rt_editMeta"></div><div class="result-m" id="rm_editMeta"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_editMeta" onclick="run('editMeta')" disabled>💾 Save Metadata</button>
-      <a class="btn-dl" id="bd_editMeta">⬇️ Download</a>
+      <button class="btn-dl" id="bd_editMeta" onclick="doDownload('editMeta')">⬇️ Download</button>
     </div>`;
   setupDZ('editMeta');
 }
@@ -1040,9 +1131,9 @@ function uiExtractImg(el){
     <div class="result-box" id="rb_extractImg"><div class="result-ic">✅</div><div><div class="result-t" id="rt_extractImg"></div><div class="result-m" id="rm_extractImg"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_extractImg" onclick="run('extractImg')" disabled>🖼️ Extract Images</button>
-      <a class="btn-dl" id="bd_extractImg">⬇️ Download ZIP</a>
+      <button class="btn-dl" id="bd_extractImg" onclick="doDownload('extractImg')">⬇️ Download ZIP</button>
     </div>`;
-  setupDZ('eximg','f_extractImg',['application/pdf']);
+  setupDZ('extractImg');
 }
 async function doExtractImg(s){
   const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
@@ -1063,9 +1154,9 @@ async function doExtractImg(s){
     zip.file(`page_${String(i).padStart(3,'0')}.${fmt==='jpeg'?'jpg':'png'}`,await blob.arrayBuffer());
   }
   setP('extractImg',95,'Zipping…');
-  const zb=await zip.generateAsync({type:'arraybuffer'});
-  s.result={type:'zip',bytes:zb,filename:'images_'+file.name.replace('.pdf','.zip')};
-  showRes('extractImg',`${total} images extracted!`,fmtSize(zb.byteLength)); hideP('extractImg');
+  const zb=await zip.generateAsync({type:'blob'});
+  s.result={type:'zip',blob:zb,filename:'images_'+file.name.replace('.pdf','.zip')};
+  showRes('extractImg',`${total} images extracted!`,fmtSize(zb.size)); hideP('extractImg');
 }
 
 // ── RESIZE PDF ────────────────────────────────────────────────
@@ -1092,9 +1183,9 @@ function uiResizepdf(el){
     <div class="result-box" id="rb_resizepdf"><div class="result-ic">✅</div><div><div class="result-t" id="rt_resizepdf"></div><div class="result-m" id="rm_resizepdf"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_resizepdf" onclick="run('resizepdf')" disabled>↕️ Resize PDF</button>
-      <a class="btn-dl" id="bd_resizepdf">⬇️ Download</a>
+      <button class="btn-dl" id="bd_resizepdf" onclick="doDownload('resizepdf')">⬇️ Download</button>
     </div>`;
-  setupDZ('rpdf','f_resizepdf',['application/pdf']);
+  setupDZ('resizepdf');
 }
 async function doResizepdf(s){
   const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
@@ -1152,13 +1243,21 @@ function uiAltmix(el){
         <div class="opt-g"><div class="opt-l">Reverse PDF B</div><select class="opt-s" id="alt_rev"><option value="no">No</option><option value="yes">Yes (back-scan)</option></select></div>
       </div>
     </div>
-    <div class="prog" id="prog_altmix"><div class="prog-hd"><span class="prog-l">Mixing…</span><span class="prog-p" id="pv_altmix">0%</span></div><div class="prog-track"><div class="prog-bar" id="pb_altmix"></div></div></div>
-    <div class="result-box" id="res_altmix"><div class="result-ic">✅</div><div><div class="result-t" id="rt_altmix"></div><div class="result-m" id="rm_altmix"></div></div></div>
+    <div class="prog" id="pw_altmix"><div class="prog-hd"><span class="prog-l">Mixing…</span><span class="prog-p" id="pp_altmix">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_altmix"></div></div></div>
+    <div class="result-box" id="rb_altmix"><div class="result-ic">✅</div><div><div class="result-t" id="rt_altmix"></div><div class="result-m" id="rm_altmix"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_altmix" onclick="run('altmix')" disabled>🔀 Alternate & Mix</button>
-      <a class="btn-dl" id="dl_altmix">⬇️ Download</a>
+      <button class="btn-dl" id="bd_altmix" onclick="doDownload('altmix')">⬇️ Download</button>
     </div>`;
   altFiles_={A:null,B:null};
+  // Wire drag-drop for both drop zones
+  ['altA','altB'].forEach(sid=>{
+    const dz=document.getElementById('dz_'+sid);
+    if(!dz)return;
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+    dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+    dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');onAltFile_(sid.slice(-1),e.dataTransfer.files);});
+  });
 }
 function onAltFile_(side,files){
   if(!files.length)return;
@@ -1223,9 +1322,9 @@ function uiHeadfoot(el){
     <div class="result-box" id="rb_headfoot"><div class="result-ic">✅</div><div><div class="result-t" id="rt_headfoot"></div><div class="result-m" id="rm_headfoot"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_headfoot" onclick="run('headfoot')" disabled>📋 Apply</button>
-      <a class="btn-dl" id="dl_headfoot">⬇️ Download</a>
+      <button class="btn-dl" id="bd_headfoot" onclick="doDownload('headfoot')">⬇️ Download</button>
     </div>`;
-  setupDZ('hf','f_headfoot',['application/pdf']);
+  setupDZ('headfoot');
 }
 async function doHeadfoot(s){
   const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
@@ -1274,9 +1373,9 @@ function uiRemoveann(el){
     <div class="result-box" id="rb_removeann"><div class="result-ic">✅</div><div><div class="result-t" id="rt_removeann"></div><div class="result-m" id="rm_removeann"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_removeann" onclick="run('removeann')" disabled>🧹 Remove Annotations</button>
-      <a class="btn-dl" id="dl_removeann">⬇️ Download</a>
+      <button class="btn-dl" id="bd_removeann" onclick="doDownload('removeann')">⬇️ Download</button>
     </div>`;
-  setupDZ('rann','f_removeann',['application/pdf']);
+  setupDZ('removeann');
 }
 async function doRemoveann(s){
   const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
@@ -1313,44 +1412,50 @@ function uiDeskew(el){
     <div class="result-box" id="rb_deskew"><div class="result-ic">✅</div><div><div class="result-t" id="rt_deskew"></div><div class="result-m" id="rm_deskew"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_deskew" onclick="run('deskew')" disabled>📐 Deskew PDF</button>
-      <a class="btn-dl" id="dl_deskew">⬇️ Download</a>
+      <button class="btn-dl" id="bd_deskew" onclick="doDownload('deskew')">⬇️ Download</button>
     </div>`;
-  setupDZ('dsk','f_deskew',['application/pdf']);
+  setupDZ('deskew');
 }
 async function doDeskew(s){
   const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
-  const angle=parseFloat(document.getElementById('dsk_angle').value)||0;
-  const scale=parseFloat(document.getElementById('dsk_scale').value)||2;
-  setP('deskew',10,'Loading…');
+  const origSize=file.size;
+  const angle=parseFloat(document.getElementById('dsk_angle')?.value)||0;
+  const renderScale=1.5;  // fixed reasonable DPI — removed user-facing scale input confusion
+  setP('deskew',5,'Loading…');
   const ab=await file.arrayBuffer();
   const pjsDoc=await pjsLoad(ab);
   const total=pjsDoc.numPages;
   const newPdf=await PDFDocument.create();
   const rad=angle*Math.PI/180;
-  const sin=Math.abs(Math.sin(rad)),cos=Math.abs(Math.cos(rad));
+  const sinA=Math.abs(Math.sin(rad)), cosA=Math.abs(Math.cos(rad));
   for(let i=1;i<=total;i++){
-    setP('deskew',10+(i/total)*80,`Straightening ${i}/${total}…`);
+    setP('deskew',5+(i/total)*88,`Straightening ${i}/${total}…`);
     const pg=await pjsDoc.getPage(i);
-    const vp=pg.getViewport({scale});
-    const src=document.createElement('canvas'); src.width=vp.width; src.height=vp.height;
-    await pg.render({canvasContext:src.getContext('2d'),viewport:vp}).promise;
-    const W=Math.ceil(vp.height*sin+vp.width*cos);
-    const H=Math.ceil(vp.height*cos+vp.width*sin);
+    const vp=pg.getViewport({scale:renderScale});
+    const src=document.createElement('canvas'); src.width=Math.floor(vp.width); src.height=Math.floor(vp.height);
+    const srcCtx=src.getContext('2d');
+    srcCtx.fillStyle='white'; srcCtx.fillRect(0,0,src.width,src.height);
+    await pg.render({canvasContext:srcCtx,viewport:vp}).promise;
+    const W=Math.ceil(vp.height*sinA+vp.width*cosA);
+    const H=Math.ceil(vp.height*cosA+vp.width*sinA);
     const dst=document.createElement('canvas'); dst.width=W; dst.height=H;
     const ctx=dst.getContext('2d');
     ctx.fillStyle='white'; ctx.fillRect(0,0,W,H);
     ctx.translate(W/2,H/2); ctx.rotate(rad);
-    ctx.drawImage(src,-vp.width/2,-vp.height/2);
-    const jb=await new Promise(r=>dst.toBlob(b=>b.arrayBuffer().then(r),'image/jpeg',0.93));
+    ctx.drawImage(src,-src.width/2,-src.height/2);
+    const jb=await new Promise(r=>dst.toBlob(b=>b.arrayBuffer().then(r),'image/jpeg',0.88));
     const img=await newPdf.embedJpg(jb);
-    const {width,height}=img.scale(1);
-    const np=newPdf.addPage([width/2,height/2]);
-    np.drawImage(img,{x:0,y:0,width:width/2,height:height/2});
+    // Page size in PDF points = pixel size / renderScale
+    const ptW=W/renderScale, ptH=H/renderScale;
+    const np=newPdf.addPage([ptW,ptH]);
+    np.drawImage(img,{x:0,y:0,width:ptW,height:ptH});
   }
-  const bytes=await newPdf.save();
+  const bytes=await newPdf.save({useObjectStreams:true});
+  const saved=((1-bytes.length/origSize)*100).toFixed(1);
   s.result={type:'pdf',bytes,filename:'deskewed_'+file.name};
-  showRes('deskew','PDF Straightened!',`${total} pages deskewed`); hideP('deskew');
+  showRes('deskew','PDF Straightened!',`${total} pages · ${fmtSize(origSize)} → ${fmtSize(bytes.length)} (${saved>=0?'-'+saved:'~same'}%)`); hideP('deskew');
 }
+
 
 // ── PDF TO TEXT ───────────────────────────────────────────────
 function uiPdf2txt(el){
@@ -1375,9 +1480,9 @@ function uiPdf2txt(el){
     <div class="result-box" id="rb_pdf2txt"><div class="result-ic">✅</div><div><div class="result-t" id="rt_pdf2txt"></div><div class="result-m" id="rm_pdf2txt"></div></div></div>
     <div class="act-row">
       <button class="btn-go" id="bg_pdf2txt" onclick="run('pdf2txt')" disabled>📃 Extract Text</button>
-      <a class="btn-dl" id="dl_pdf2txt">⬇️ Download .txt</a>
+      <button class="btn-dl" id="bd_pdf2txt" onclick="doDownload('pdf2txt')">⬇️ Download .txt</button>
     </div>`;
-  setupDZ('p2t','f_pdf2txt',['application/pdf']);
+  setupDZ('pdf2txt');
 }
 async function doPdf2txt(s){
   const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
@@ -1401,7 +1506,180 @@ async function doPdf2txt(s){
   }
   const preview=document.getElementById('p2t_preview');
   preview.style.display=''; preview.textContent=txt.trim();
-  const bytes=new TextEncoder().encode(txt).buffer;
-  s.result={type:'txt',bytes,filename:file.name.replace('.pdf','.txt')};
+  s.result={type:'txt',text:txt,filename:file.name.replace('.pdf','.txt')};
   showRes('pdf2txt','Text Extracted!',`${idxs.length} pages · ${txt.length.toLocaleString()} chars`); hideP('pdf2txt');
+}
+
+// ── N-UP / MULTIPLE PAGES PER SHEET ───────────────────────────
+function uiNup(el){
+  el.innerHTML=`
+    <div class="dzone" id="dz_nup" onclick="document.getElementById('fi_nup').click()">
+      <div class="dzone-icon">📄📄</div><h3>Multiple Pages per Sheet (N-up)</h3>
+      <p>Print multiple pages arranged on a single sheet</p>
+      <div class="dzone-btn">📂 Choose PDF</div>
+    </div>
+    <input type="file" id="fi_nup" accept=".pdf" hidden onchange="onFiles('nup',this.files)">
+    <div class="flist" id="fl_nup"></div>
+    <div class="opt-section">
+      <div class="opt-row">
+        <div class="opt-g"><div class="opt-l">Pages per Sheet</div>
+          <select class="opt-s" id="nup_pages"><option value="2">2 pages per sheet</option><option value="4" selected>4 pages per sheet</option><option value="6">6 pages per sheet</option><option value="8">8 pages per sheet</option><option value="9">9 pages per sheet</option></select>
+        </div>
+        <div class="opt-g"><div class="opt-l">Sheet Size</div>
+          <select class="opt-s" id="nup_size"><option value="A4" selected>A4</option><option value="Letter">Letter</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="prog" id="pw_nup"><div class="prog-hd"><span class="prog-l">Arranging…</span><span class="prog-p" id="pp_nup">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar_nup"></div></div></div>
+    <div class="result-box" id="rb_nup"><div class="result-ic">✅</div><div><div class="result-t" id="rt_nup"></div><div class="result-m" id="rm_nup"></div></div></div>
+    <div class="act-row">
+      <button class="btn-go" id="bg_nup" onclick="run('nup')" disabled>📄 Arrange Pages</button>
+      <button class="btn-dl" id="bd_nup" onclick="doDownload('nup')">⬇️ Download</button>
+    </div>`;
+  setupDZ('nup');
+}
+async function doNup(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload a PDF first');
+  const npp=parseInt(document.getElementById('nup_pages').value)||4;
+  const isA4=document.getElementById('nup_size').value==='A4';
+  const outW = isA4 ? 595.28 : 612;
+  const outH = isA4 ? 841.89 : 792;
+  setP('nup',10,'Loading PDF…');
+  const ab = await file.arrayBuffer();
+  const pdfDoc = await PDFDocument.load(ab, {ignoreEncryption:true});
+  const pages = pdfDoc.getPages();
+  const newPdf = await PDFDocument.create();
+
+  // Grid logic
+  let cols=2, rows=1;
+  if(npp===2){cols=1; rows=2;}
+  else if(npp===4){cols=2; rows=2;}
+  else if(npp===6){cols=2; rows=3;}
+  else if(npp===8){cols=2; rows=4;}
+  else if(npp===9){cols=3; rows=3;}
+  
+  const cellW = outW / cols;
+  const cellH = outH / rows;
+
+  let currentPg = null;
+  for(let i=0; i<pages.length; i++){
+    setP('nup',10+(i/pages.length)*80,`Arranging ${i+1}…`);
+    if(i % npp === 0) currentPg = newPdf.addPage([outW, outH]);
+    
+    // Calculate position
+    const idxOnSheet = i % npp;
+    const r = Math.floor(idxOnSheet / cols);
+    const c = idxOnSheet % cols;
+    
+    // Embed the page
+    const [embedded] = await newPdf.embedPdf(pdfDoc, [i]);
+    
+    // Scale to fit cell (with minor margin)
+    const margin = 10;
+    const sc = Math.min((cellW - margin*2)/embedded.width, (cellH - margin*2)/embedded.height);
+    const drawW = embedded.width * sc;
+    const drawH = embedded.height * sc;
+    
+    // Center within cell
+    const cx = (c * cellW) + (cellW - drawW)/2;
+    // Y is from bottom up in PDF
+    const cy = outH - ((r+1) * cellH) + (cellH - drawH)/2;
+    
+    currentPg.drawPage(embedded, {
+      x: cx,
+      y: cy,
+      width: drawW,
+      height: drawH
+    });
+  }
+  
+  setP('nup',95,'Saving…');
+  const bytes = await newPdf.save();
+  s.result = {type:'pdf', bytes, filename:`${npp}up_${file.name}`};
+  showRes('nup','Pages Arranged!',`Combined into ${newPdf.getPageCount()} sheets`);
+  hideP('nup');
+}
+// ── IMAGE TOOLS (RESIZE, CROP, COMPRESS, FORMAT) ──────────────
+function _loadImg(ab){
+  return new Promise((r,j)=>{
+    const b=new Blob([ab]); const url=URL.createObjectURL(b);
+    const img=new Image(); img.onload=()=>r(img); img.onerror=j; img.src=url;
+  });
+}
+async function doResizeImg(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload an image first');
+  setP('resize_img',30,'Loading image…');
+  const img=await _loadImg(await file.arrayBuffer());
+  const wIn=parseInt(document.getElementById('ri_w').value);
+  const hIn=parseInt(document.getElementById('ri_h').value);
+  let W=img.width, H=img.height;
+  if(wIn&&hIn){W=wIn;H=hIn;}
+  else if(wIn){W=wIn;H=Math.round((wIn/img.width)*img.height);}
+  else if(hIn){H=hIn;W=Math.round((hIn/img.height)*img.width);}
+  else throw new Error('Enter at least one dimension (width or height)');
+  setP('resize_img',60,'Resizing…');
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  cv.getContext('2d').drawImage(img,0,0,W,H);
+  const blob=await new Promise(r=>cv.toBlob(r,file.type||'image/jpeg',0.92));
+  s.result={type:'img',blob,filename:'resized_'+file.name};
+  showRes('resize_img','Image Resized!',`${img.width}x${img.height} ➔ ${W}x${H} pixels`); hideP('resize_img');
+}
+async function doCropImg(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload an image first');
+  setP('crop_img',30,'Loading image…');
+  const img=await _loadImg(await file.arrayBuffer());
+  const aspect=document.getElementById('ci_aspect').value;
+  let W=img.width, H=img.height, sx=0, sy=0;
+  if(aspect==='free'){
+    W=Math.round(W*0.8); H=Math.round(H*0.8);
+    sx=Math.round((img.width-W)/2); sy=Math.round((img.height-H)/2);
+  } else {
+    const [aw,ah]=aspect.split(':').map(Number);
+    const ratio=aw/ah;
+    if(img.width/img.height > ratio){
+      H=img.height; W=Math.round(H*ratio); sx=Math.round((img.width-W)/2);
+    } else {
+      W=img.width; H=Math.round(W/ratio); sy=Math.round((img.height-H)/2);
+    }
+  }
+  setP('crop_img',60,'Cropping…');
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  cv.getContext('2d').drawImage(img,sx,sy,W,H,0,0,W,H);
+  const blob=await new Promise(r=>cv.toBlob(r,file.type||'image/jpeg',0.95));
+  s.result={type:'img',blob,filename:'cropped_'+file.name};
+  showRes('crop_img','Image Cropped!',`${W}x${H} pixels`); hideP('crop_img');
+}
+async function doCompressImg(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload an image first');
+  setP('compress_img',30,'Loading image…');
+  const img=await _loadImg(await file.arrayBuffer());
+  const q=parseFloat(document.getElementById('coi_q').value)||0.75;
+  setP('compress_img',60,'Compressing…');
+  const cv=document.createElement('canvas'); cv.width=img.width; cv.height=img.height;
+  cv.getContext('2d').drawImage(img,0,0);
+  const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',q));
+  s.result={type:'img',blob,filename:'compressed_'+file.name.replace(/\.[^.]+$/,'.jpg')};
+  showRes('compress_img','Image Compressed!',`${fmtSize(file.size)} ➔ ${fmtSize(blob.size)}`); hideP('compress_img');
+}
+async function doJpg2Png(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload an image first');
+  setP('jpg2png_img',30,'Converting…');
+  const img=await _loadImg(await file.arrayBuffer());
+  const cv=document.createElement('canvas'); cv.width=img.width; cv.height=img.height;
+  cv.getContext('2d').drawImage(img,0,0);
+  const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+  s.result={type:'img',blob,filename:file.name.replace(/\.[^.]+$/,'.png')};
+  showRes('jpg2png_img','Converted to PNG!',`${img.width}x${img.height}`); hideP('jpg2png_img');
+}
+async function doPng2Jpg(s){
+  const file=s.files[0]; if(!file) throw new Error('Upload an image first');
+  setP('png2jpg_img',30,'Converting…');
+  const img=await _loadImg(await file.arrayBuffer());
+  const cv=document.createElement('canvas'); cv.width=img.width; cv.height=img.height;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='white'; ctx.fillRect(0,0,img.width,img.height);
+  ctx.drawImage(img,0,0);
+  const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',0.92));
+  s.result={type:'img',blob,filename:file.name.replace(/\.[^.]+$/,'.jpg')};
+  showRes('png2jpg_img','Converted to JPG!',`${img.width}x${img.height}`); hideP('png2jpg_img');
 }

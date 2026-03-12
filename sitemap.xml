@@ -1,59 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-<url><loc>https://lovepdfs.in/</loc></url>
-<url><loc>https://lovepdfs.in/merge-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/compress-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/split-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/rotate-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/unlock-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/protect-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/add-watermark-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/remove-pages-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/organize-pdf/</loc></url>
+  <!-- ═══ CORE PAGES ═══ -->
+  <url><loc>https://lovepdfs.in/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://lovepdfs.in/all-tools.html</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://lovepdfs.in/features.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/pricing.html</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/about.html</loc><changefreq>monthly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://lovepdfs.in/contact.html</loc><changefreq>monthly</changefreq><priority>0.65</priority></url>
+  <url><loc>https://lovepdfs.in/faq.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://lovepdfs.in/blog.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
-<url><loc>https://lovepdfs.in/pdf-to-word/</loc></url>
-<url><loc>https://lovepdfs.in/pdf-to-excel/</loc></url>
-<url><loc>https://lovepdfs.in/pdf-to-ppt/</loc></url>
-<url><loc>https://lovepdfs.in/pdf-to-jpg/</loc></url>
+  <!-- ═══ CATEGORY PAGES ═══ -->
+  <url><loc>https://lovepdfs.in/pdf-tools/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://lovepdfs.in/image-tools/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://lovepdfs.in/calculator-tools/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://lovepdfs.in/converter-tools/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
 
-<url><loc>https://lovepdfs.in/word-to-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/excel-to-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/ppt-to-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/jpg-to-pdf/</loc></url>
+  <!-- ═══ PDF TOOLS – ORGANISE ═══ -->
+  <url><loc>https://lovepdfs.in/merge-pdf/</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://lovepdfs.in/split-pdf/</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://lovepdfs.in/remove-pages-pdf/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/extract-pages-pdf/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/organize-pdf/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/alternate-mix-pdf/</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/nup-pdf/</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
 
-<url><loc>https://lovepdfs.in/resize-image/</loc></url>
-<url><loc>https://lovepdfs.in/crop-image/</loc></url>
-<url><loc>https://lovepdfs.in/compress-image/</loc></url>
+  <!-- ═══ PDF TOOLS – OPTIMISE ═══ -->
+  <url><loc>https://lovepdfs.in/compress-pdf/</loc><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://lovepdfs.in/repair-pdf/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/ocr-extract-text/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/grayscale-pdf/</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/flatten-pdf/</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/deskew-pdf/</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/resize-pdf/</loc><changefreq>monthly</changefreq><priority>0.76</priority></url>
 
-<url><loc>https://lovepdfs.in/jpg-to-png/</loc></url>
-<url><loc>https://lovepdfs.in/png-to-jpg/</loc></url>
+  <!-- ═══ PDF TOOLS – EDIT ═══ -->
+  <url><loc>https://lovepdfs.in/edit-pdf/</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://lovepdfs.in/sign-pdf/</loc><changefreq>monthly</changefreq><priority>0.84</priority></url>
+  <url><loc>https://lovepdfs.in/add-watermark-pdf/</loc><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://lovepdfs.in/add-page-numbers-pdf/</loc><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://lovepdfs.in/header-footer-pdf/</loc><changefreq>monthly</changefreq><priority>0.76</priority></url>
+  <url><loc>https://lovepdfs.in/crop-pdf/</loc><changefreq>monthly</changefreq><priority>0.76</priority></url>
+  <url><loc>https://lovepdfs.in/rotate-pdf/</loc><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://lovepdfs.in/edit-pdf-metadata/</loc><changefreq>monthly</changefreq><priority>0.74</priority></url>
+  <url><loc>https://lovepdfs.in/redact-pdf/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/remove-annotations-pdf/</loc><changefreq>monthly</changefreq><priority>0.74</priority></url>
+  <url><loc>https://lovepdfs.in/compare-pdf/</loc><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://lovepdfs.in/extract-images-pdf/</loc><changefreq>monthly</changefreq><priority>0.76</priority></url>
 
-<url><loc>https://lovepdfs.in/edit-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/extract-pages-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/repair-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/ocr-extract-text/</loc></url>
+  <!-- ═══ PDF TOOLS – SECURITY ═══ -->
+  <url><loc>https://lovepdfs.in/protect-pdf/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/unlock-pdf/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/pdf-to-pdfa/</loc><changefreq>monthly</changefreq><priority>0.74</priority></url>
 
-<url><loc>https://lovepdfs.in/sign-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/redact-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/compare-pdf/</loc></url>
+  <!-- ═══ CONVERTER TOOLS ═══ -->
+  <url><loc>https://lovepdfs.in/pdf-to-word/</loc><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://lovepdfs.in/word-to-pdf/</loc><changefreq>monthly</changefreq><priority>0.86</priority></url>
+  <url><loc>https://lovepdfs.in/pdf-to-excel/</loc><changefreq>monthly</changefreq><priority>0.84</priority></url>
+  <url><loc>https://lovepdfs.in/excel-to-pdf/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/pdf-to-ppt/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/ppt-to-pdf/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/pdf-to-text/</loc><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://lovepdfs.in/html-to-pdf/</loc><changefreq>monthly</changefreq><priority>0.78</priority></url>
 
-<url><loc>https://lovepdfs.in/html-to-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/pdf-to-pdfa/</loc></url>
+  <!-- ═══ IMAGE TOOLS ═══ -->
+  <url><loc>https://lovepdfs.in/resize-image/</loc><changefreq>monthly</changefreq><priority>0.84</priority></url>
+  <url><loc>https://lovepdfs.in/crop-image/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/compress-image/</loc><changefreq>monthly</changefreq><priority>0.84</priority></url>
+  <url><loc>https://lovepdfs.in/jpg-to-png/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/png-to-jpg/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/jpg-to-pdf/</loc><changefreq>monthly</changefreq><priority>0.84</priority></url>
+  <url><loc>https://lovepdfs.in/pdf-to-jpg/</loc><changefreq>monthly</changefreq><priority>0.84</priority></url>
 
-<url><loc>https://lovepdfs.in/grayscale-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/flatten-pdf/</loc></url>
+  <!-- ═══ CALCULATOR TOOLS ═══ -->
+  <url><loc>https://lovepdfs.in/age-calculator/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/percentage-calculator/</loc><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://lovepdfs.in/gst-calculator/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/word-counter/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/loan-calculator/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/bmi-calculator/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/date-calculator/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lovepdfs.in/currency-converter/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
-<url><loc>https://lovepdfs.in/edit-pdf-metadata/</loc></url>
-<url><loc>https://lovepdfs.in/extract-images-pdf/</loc></url>
+  <!-- ═══ BLOG POSTS ═══ -->
+  <url><loc>https://lovepdfs.in/blog-convert-pdf-word.html</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/blog-redact-pdf.html</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/blog-reduce-pdf-size.html</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/blog-electronic-signatures.html</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/blog-merge-pdfs.html</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://lovepdfs.in/blog-ocr-vs-text-extraction.html</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
 
-<url><loc>https://lovepdfs.in/resize-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/alternate-mix-pdf/</loc></url>
-
-<url><loc>https://lovepdfs.in/header-footer-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/remove-annotations-pdf/</loc></url>
-
-<url><loc>https://lovepdfs.in/deskew-pdf/</loc></url>
-<url><loc>https://lovepdfs.in/pdf-to-text/</loc></url>
+  <!-- ═══ LEGAL & COMPANY ═══ -->
+  <url><loc>https://lovepdfs.in/privacy.html</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://lovepdfs.in/terms.html</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://lovepdfs.in/cookies.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://lovepdfs.in/security.html</loc><changefreq>yearly</changefreq><priority>0.55</priority></url>
+  <url><loc>https://lovepdfs.in/business.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://lovepdfs.in/education.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://lovepdfs.in/press.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 
 </urlset>

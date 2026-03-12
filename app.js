@@ -35,12 +35,7 @@ function renderTools(search=''){
 
 function toolCard(t){
   // Check if we are on the homepage index.html or another page
-  const isHome = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html');
-  // Find URL path mapping from TOOLS_SEO if possible, or fallback to hash-based modal
-  const seoData = typeof module !== 'undefined' ? [] : (window.TOOLS_SEO || []);  
-  
-  // To avoid needing tools-data.js everywhere on the client, we'll route based on standard slug if we're on Home
-  const toolSlug = t.id; // Usually mapped, we'll dynamically use the known standard slugs
+  const isHome = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('all-tools.html');
   
   // Very simple client-side slug mapping (assuming tools map 1:1 with typical SEO IDs, or just map them explicitly)
   const slugMap = {
@@ -56,13 +51,21 @@ function toolCard(t){
     'grayscale': 'grayscale-pdf', 'flatten': 'flatten-pdf', 'editMeta': 'edit-pdf-metadata',
     'extractImg': 'extract-images-pdf', 'resizepdf': 'resize-pdf', 'altmix': 'alternate-mix-pdf',
     'headfoot': 'header-footer-pdf', 'removeann': 'remove-annotations-pdf',
-    'deskew': 'deskew-pdf', 'pdf2txt': 'pdf-to-text'
+    'deskew': 'deskew-pdf', 'pdf2txt': 'pdf-to-text', 'nup': 'nup-pdf',
+    'age_calc': 'age-calculator', 'word_counter': 'word-counter', 'pct_calc': 'percentage-calculator', 'gst_calc': 'gst-calculator',
+    'loan_calc': 'loan-calculator', 'bmi_calc': 'bmi-calculator', 'date_calc': 'date-calculator', 'currency': 'currency-converter'
   };
+  
+
+  // Distribute colors evenly
+  const colors = ['tc-red', 'tc-green', 'tc-blue', 'tc-amber', 'tc-purple'];
+  const colorIndex = Object.keys(slugMap).indexOf(t.id) % colors.length;
+  const colorClass = colorIndex >= 0 ? colors[colorIndex] : colors[0];
   
   const href = isHome ? (slugMap[t.id] ? `./${slugMap[t.id]}/index.html` : `javascript:openTool('${t.id}')`) : 
                (slugMap[t.id] ? `../${slugMap[t.id]}/index.html` : `javascript:openTool('${t.id}')`);
                
-  return `<a class="tool-card" href="${href}">
+  return `<a class="tool-card ${colorClass}" href="${href}">
     ${t.badge?`<div class="tc-badge bg-${t.badge}">${t.badge}</div>`:''}
     <div class="tc-shine"></div>
     <div class="tc-icon" style="background:${t.clr}12;color:${t.clr}">${t.icon}</div>
@@ -156,7 +159,15 @@ function buildUI(id){
     case 'removepg': return DZ(id,'.pdf',false)+`<div class="pg-wrap" id="pgw_${id}"><div class="pg-hd"><span class="pg-hint">Click pages to mark for deletion</span><div class="pg-acts"><button class="pg-act" onclick="pgAll('${id}')">Select All</button><button class="pg-act" onclick="pgClr('${id}')">Clear</button></div></div><div class="pg-grid" id="pgg_${id}"></div></div>`+PROG(id)+RES(id)+ACTS(id);
     case 'extract': return base(OPTS(id,I('ex_range','Page Range','text','1-3, 5, 8-10')+S('ex_out','Output Format',[['one','Single PDF'],['sep','Separate PDFs (ZIP)']],'one')));
     case 'organize': return DZ(id,'.pdf',false)+`<div class="pg-wrap" id="pgw_${id}"><div class="pg-hd"><span class="pg-hint">Drag pages to reorder • Then click Apply</span></div><div class="pg-grid" id="pgg_${id}"></div></div>`+PROG(id)+RES(id)+ACTS(id);
-    case 'compress': return base(OPTS(id,S('cmp_lvl','Compression Level',[['low','Low — Best Quality'],['med','Medium — Balanced (Recommended)'],['hi','High — Smallest Size']],'med')));
+    case 'compress': return base(`
+<div class="preset-bar">
+  <div class="preset-label">Quick Presets:</div>
+  <button class="preset-btn on" id="cpre_low" onclick="setCompressPreset('low')">🟢 Low — Lossless</button>
+  <button class="preset-btn" id="cpre_med" onclick="setCompressPreset('med')">🟡 50% Quality</button>
+  <button class="preset-btn" id="cpre_hi" onclick="setCompressPreset('hi')">🔴 25% Quality</button>
+</div>
+`+OPTS(id,S('cmp_lvl','Compression Level',[['low','Low — Lossless structure only (no quality loss)'],['med','Medium — Colour recompress at 50% quality'],['hi','High — 25% quality (most aggressive)']],'med'))+`<div style="padding:0.6rem 0.875rem;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.18);border-radius:10px;font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem">💡 Always picks the best result — if rasterising makes a file bigger, the lossless version is used instead.</div>`);
+
     case 'repair': return base();
     case 'ocr': return DZ(id,'.pdf',false)+`<div id="ocr_panel" style="display:none">`+OPTS(id,S('ocr_pgs','Pages to Extract',[['all','All Pages'],['first','First Page Only'],['range','Custom Range']],'all')+I('ocr_range','Range (if custom)','text','1-5'))+`<button class="ocr-copy-btn" onclick="copyOCR()">📋 Copy All Text</button><div class="ocr-out" id="ocr_text">Extracted text will appear here…</div></div>`+PROG(id)+RES(id)+ACTS(id);
     case 'jpg2pdf': return DZ(id,'.jpg,.jpeg,.png,.webp,.bmp')+OPTS(id,S('j2p_sz','Page Size',[['auto','Auto (fit image)'],['a4','A4'],['letter','US Letter'],['legal','Legal'],['a3','A3']],'auto')+S('j2p_orient','Orientation',[['auto','Auto Detect'],['portrait','Portrait'],['landscape','Landscape']],'auto')+S('j2p_margin','Margin',[['0','None'],['20','Small'],['40','Medium'],['60','Large']],'0'))+PROG(id)+RES(id)+ACTS(id);
@@ -178,9 +189,32 @@ function buildUI(id){
     case 'sign': return DZ(id,'.pdf',false)+`<div id="sign_panel" style="display:none;margin-bottom:1.25rem"><div class="sign-tabs" id="signTabs"><button class="sign-tab on" onclick="setSignTab('draw',this)">✏️ Draw Signature</button><button class="sign-tab" onclick="setSignTab('type',this)">⌨️ Type Signature</button></div><div id="signDraw"><div class="sign-canvas-wrap"><div class="sign-cbar">Draw your signature below <button class="sign-clr-btn" onclick="clearSign()">Clear</button></div><canvas id="signC" width="620" height="130"></canvas></div><div class="opt-row">`+S('sign_pos','Place On',[['last','Last Page Only'],['all','All Pages'],['first','First Page Only']],'last')+S('sign_corner','Position',[['br','Bottom Right'],['bl','Bottom Left'],['bc','Bottom Center'],['tr','Top Right']],'br')+`</div></div><div id="signType" style="display:none"><input class="sign-typed" id="signTyped" placeholder="Your Name…"><div class="opt-row">`+S('sign_style','Style',[['normal','Normal'],['italic','Cursive Style'],['bold','Bold']],'italic')+S('sign_sz','Size',[['sm','Small'],['md','Medium'],['lg','Large']],'md')+`</div></div></div>`+PROG(id)+RES(id)+ACTS(id);
     case 'redact': return DZ(id,'.pdf',false)+`<div class="redact-notice">⚠️ Redaction permanently removes content. Select regions by dragging over the area to hide. This cannot be undone.</div><div id="redact_panel" style="display:none"><div class="rd-viewer"><div class="viewer-bar"><span class="v-info" id="rd_info">Page 1/1</span><button class="vbtn" onclick="rdPrev()">◀</button><button class="vbtn" onclick="rdNext()">▶</button><span style="font-size:0.75rem;color:var(--muted);margin-left:auto">Click and drag to select area</span></div><div class="rd-canvas-wrap"><canvas id="rdC"></canvas><canvas id="rdO"></canvas></div></div></div>`+PROG(id)+RES(id)+ACTS(id);
     case 'compare': return `<div class="cmp-cols"><div class="cmp-col"><div class="cmp-col-hd">📄 Original (A)</div><div class="cmp-zone" onclick="document.getElementById('fi_cmpA').click()"><div class="dzone" id="dz_cmpA" style="padding:1.5rem"><span class="dzone-icon" style="font-size:1.6rem">📄</span><h3 style="font-size:0.875rem">Upload PDF A</h3><div class="dzone-btn" style="padding:0.4rem 1rem;font-size:0.75rem">Choose</div></div><input type="file" id="fi_cmpA" accept=".pdf" style="display:none" onchange="onCmpFile('A',this.files)"></div><div class="cmp-canvas"><canvas id="cmpCA" style="max-width:100%"></canvas></div></div><div class="cmp-col"><div class="cmp-col-hd">📋 Revised (B)</div><div class="cmp-zone" onclick="document.getElementById('fi_cmpB').click()"><div class="dzone" id="dz_cmpB" style="padding:1.5rem"><span class="dzone-icon" style="font-size:1.6rem">📋</span><h3 style="font-size:0.875rem">Upload PDF B</h3><div class="dzone-btn" style="padding:0.4rem 1rem;font-size:0.75rem">Choose</div></div><input type="file" id="fi_cmpB" accept=".pdf" style="display:none" onchange="onCmpFile('B',this.files)"></div><div class="cmp-canvas"><canvas id="cmpCB" style="max-width:100%"></canvas></div></div></div><div style="font-size:0.78rem;color:var(--muted);text-align:center;margin-bottom:1.25rem">Upload both PDFs to enable comparison</div>`+PROG('compare')+RES('compare')+`<div class="act-row"><button class="btn-go" id="bg_compare" onclick="run('compare')">🔀 Compare PDFs</button><button class="btn-dl" id="bd_compare" onclick="doDownload('compare')">⬇ Download</button><button class="btn-rst" onclick="resetT('compare')">↺ Reset</button></div>`;
-    case 'resize_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+OPTS(id,I('ri_w','Width (px)','number','e.g. 1920')+I('ri_h','Height (px)','number','e.g. 1080'))+PROG(id)+RES(id)+ACTS(id);
+    case 'resize_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+`
+<div class="preset-bar">
+  <div class="preset-label">Quick Scale:</div>
+  <button class="preset-btn" id="ripre_75" onclick="setResizePreset(75)">75% size</button>
+  <button class="preset-btn" id="ripre_50" onclick="setResizePreset(50)">50% size</button>
+  <button class="preset-btn" id="ripre_25" onclick="setResizePreset(25)">25% size</button>
+</div>
+<div class="opt-section" id="opts_resize_img" style="display:none">
+  <div class="opt-section-title">Custom Dimensions</div>
+  <div class="opt-row">
+    <div class="opt-g"><div class="opt-l">Width (px)</div><input class="opt-i" id="ri_w" type="number" placeholder="e.g. 1920"></div>
+    <div class="opt-g"><div class="opt-l">Height (px)</div><input class="opt-i" id="ri_h" type="number" placeholder="e.g. 1080"></div>
+  </div>
+  <div style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem">Leave one empty to maintain aspect ratio.</div>
+</div>`+PROG(id)+RES(id)+ACTS(id);
+
     case 'crop_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+OPTS(id,I('ci_aspect','Aspect Ratio (e.g. 16:9, 1:1, or free)','text','free','free'))+PROG(id)+RES(id)+ACTS(id);
-    case 'compress_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+OPTS(id,S('coi_q','Quality',[['0.9','Best Quality (90%)'],['0.75','Good Balance (75%)'],['0.5','Smallest Size (50%)']],'0.75'))+PROG(id)+RES(id)+ACTS(id);
+    case 'compress_img': return DZ(id,'.jpg,.jpeg,.png,.webp',false)+`
+<div class="preset-bar">
+  <div class="preset-label">Quick Presets:</div>
+  <button class="preset-btn" id="coipre_70" onclick="setImgQualPreset('0.7', this)">70% Quality</button>
+  <button class="preset-btn on" id="coipre_50" onclick="setImgQualPreset('0.5', this)">50% Quality</button>
+  <button class="preset-btn" id="coipre_25" onclick="setImgQualPreset('0.25', this)">25% (Smallest)</button>
+</div>
+`+OPTS(id,S('coi_q','Quality',[['0.9','Best Quality (90%)'],['0.7','Good (70%)'],['0.5','Balanced (50%)'],['0.25','Smallest (25%)']],'0.5'))+PROG(id)+RES(id)+ACTS(id);
+
     case 'jpg2png_img': return DZ(id,'.jpg,.jpeg',false)+PROG(id)+RES(id)+ACTS(id);
     case 'png2jpg_img': return DZ(id,'.png',false)+PROG(id)+RES(id)+ACTS(id);
     // Sejda-inspired tools — use dedicated setup functions with delayed DOM injection
@@ -231,6 +265,13 @@ function onFiles(id,flist){
     }).catch(()=>{}));
   }
   if(id==='ocr'){document.getElementById('ocr_panel').style.display='block';showOpts(id);}
+  // For resize_img: load image to cache dimensions for presets
+  if(id==='resize_img'){
+    const fr=new FileReader();
+    fr.onload=e=>{const img=new Image();img.onload=()=>{window._resizeImgRef=img;};img.src=e.target.result;};
+    fr.readAsDataURL(s.files[0]);
+    showOpts(id);
+  }
 }
 function renderFL(id){
   const fl=document.getElementById('fl_'+id);if(!fl)return;
@@ -346,6 +387,7 @@ function doDownload(id){
   const r=gs(id).result;if(!r)return;
   if(r.type==='pdf') dlB(r.bytes,r.filename);
   else if(r.type==='zip') dlBlob(r.blob,r.filename);
+  else if(r.type==='img') dlBlob(r.blob,r.filename);
   else if(r.type==='multi') r.items.forEach(x=>dlB(x.bytes,x.filename));
   else if(r.type==='txt') dlBlob(new Blob([r.text],{type:'text/plain;charset=utf-8'}),r.filename);
   addHist(id,r);
@@ -459,7 +501,41 @@ document.querySelectorAll('[data-count]').forEach(el=>{
   obs.observe(el);
 });
 
+// ── PRESET HELPERS ────────────────────────────────────────────────
+function setCompressPreset(lvl){
+  const sel=document.getElementById('cmp_lvl');if(sel)sel.value=lvl;
+  ['low','med','hi'].forEach(l=>{const b=document.getElementById('cpre_'+l);if(b)b.classList.toggle('on',l===lvl);});
+  // Show opts
+  const opts=document.getElementById('opts_compress');if(opts)opts.style.display='';
+}
+
+// Stores the scale % for resize_img (0 = custom, else 75/50/25)
+window._resizeScalePct=0;
+function setResizePreset(pct){
+  window._resizeScalePct=pct;
+  // show opts so user sees dimensions being set
+  const opts=document.getElementById('opts_resize_img');if(opts)opts.style.display='';
+  // Find currently loaded image dimensions from STATE
+  const s=gs('resize_img');
+  const existingImg=window._resizeImgRef;
+  if(existingImg){
+    const nw=Math.round(existingImg.width*(pct/100));
+    const nh=Math.round(existingImg.height*(pct/100));
+    const rw=document.getElementById('ri_w');if(rw)rw.value=nw;
+    const rh=document.getElementById('ri_h');if(rh)rh.value=nh;
+  }
+  [75,50,25].forEach(p=>{const b=document.getElementById('ripre_'+p);if(b)b.classList.toggle('on',p===pct);});
+}
+
+function setImgQualPreset(val, el){
+  const sel=document.getElementById('coi_q');if(sel)sel.value=val;
+  document.querySelectorAll('.preset-btn[id^="coipre_"]').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  const opts=document.getElementById('opts_compress_img');if(opts)opts.style.display='';
+}
+
 // ── COMPARE CANVAS ID FIX ────────────────────────────────────────
+
 // Fix canvas IDs to match HTML
 const origOnCmpFile=window.onCmpFile;
 window.onCmpFile=async function(side,files){
